@@ -29,6 +29,8 @@ public interface LocalSettings {
 
     Image getLogo();
 
+    int getDefaultLogo();
+
     @Nullable
     String getLogoPath();
 
@@ -66,10 +68,20 @@ public interface LocalSettings {
 
     void setExportToExcelEnabled(boolean enabled);
 
-    void setProdCert(String cert);
+    void setServiceAccountKeyDev(String key);
 
     @Nullable
-    String getProdCert();
+    String getServiceAccountKeyDev();
+
+    void setServiceAccountKeyProd(String key);
+
+    @Nullable
+    String getServiceAccountKeyProd();
+
+    void setServiceAccountKeyTrain(String key);
+
+    @Nullable
+    String getServiceAccountKeyTrain();
 
     void setEmisApiUrl(String api);
 
@@ -108,4 +120,13 @@ public interface LocalSettings {
     boolean isDeletingCloudFileModeEnabled();
 
     void setDeletingCloudFileModeEnabled(boolean enabled);
+
+    void setGoogleDriveSharedFolderId(OperatingMode mode, String folderId);
+
+    @Nullable
+    String getGoogleDriveSharedFolderId(OperatingMode mode);
+
+    int getCurrentVersionCode();
+
+    void setCurrentVersionCode(int currentVersionCode);
 }

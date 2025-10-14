@@ -67,7 +67,6 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
             }
             expandedItems.add(item);
         }
-
         super.setItems(expandedItems);
     }
 
@@ -91,6 +90,7 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
         private TextView titleTextView;
         private RecyclerView recyclerView;
         private TextView totalTextView;
+        private TextView levelTextView;
         private View delimeterView;
 
         SummaryCriteriaAdapter adapter = new SummaryCriteriaAdapter();
@@ -106,7 +106,9 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
             nameTextView = findViewById(R.id.textview_standard_name);
             recyclerView = findViewById(R.id.recyclerview);
             totalTextView = findViewById(R.id.textview_total);
+            levelTextView = findViewById(R.id.textview_level);
             delimeterView = findViewById(R.id.view_delimeter);
+
         }
 
         @Override
@@ -115,23 +117,30 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
             nameTextView.setText(item.getStandard().getTitle());
 
             totalTextView.setText(String.valueOf(item.getTotalByStandard()));
+            levelTextView.setText(String.valueOf(item.getLevel().getValue()));
 
-            ViewUtils.setTintedBackgroundDrawable(totalTextView, R.drawable.bg_level, item.getLevel().getColorRes());
+            ViewUtils.setTintedBackgroundDrawable(levelTextView, R.drawable.bg_level, item.getLevel().getColorRes());
 
             adapter.setItems(item.getCriteriaSummaryViewDataList());
 
             delimeterView.setVisibility(shouldHideBottomDelimeter() ? View.GONE : View.VISIBLE);
+
         }
 
         private boolean shouldHideBottomDelimeter() {
             int position = getAdapterPosition();
             long currentGroupId = getStickyId(position);
+            int lastPosition =  getItemCount() - 1;
 
             if (position == RecyclerView.NO_POSITION) {
                 return false;
             }
 
-            if (position >= getItemCount() - 1) {
+            if (position == lastPosition) {
+                return true;
+            }
+
+            if (position > lastPosition) {
                 return false;
             }
 
@@ -147,11 +156,17 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
 
     class StickyViewHolder extends ViewHolder {
 
-        private final int subCriteriaTotalWeightShort = getResources().getInteger(R.integer.weight_fsm_summary_criteria_total_small);
-        private final int subCriteriaTotalWeightLong = getResources().getInteger(R.integer.weight_fsm_summary_criteria_total);
+        private final int subCriteriaRowWeightShort = getResources().getInteger(R.integer.weight_fsm_summary_criteria_total_small);
+        private final int subCriteriaRowWeightLong = getResources().getInteger(R.integer.weight_fsm_summary_criteria_total);
+        private final int[] subCriteriaIds = new int[] {
+                R.id.textview_subcriteria_1,
+                R.id.textview_subcriteria_2,
+                R.id.textview_subcriteria_3,
+                R.id.textview_subcriteria_4,
+                R.id.textview_subcriteria_5
+        };
 
-        private View fifthSubCriteriaRowView;
-        private View subCriteriaTotalView;
+        private final List<View> subCriteriaRowViews = new ArrayList<>();
 
         StickyViewHolder(ViewGroup parent) {
             super(parent, R.layout.item_fsm_summary_top_header);
@@ -159,36 +174,33 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
         }
 
         private void bindViews() {
-            fifthSubCriteriaRowView = findViewById(R.id.textview_subcriteria_5);
-            subCriteriaTotalView = findViewById(R.id.layout_subcriteria_total);
+            for (int subCriteriaId : subCriteriaIds) {
+                subCriteriaRowViews.add(findViewById(subCriteriaId));
+            }
         }
 
         @Override
         protected void onBind(SummaryViewData item) {
-            updateLayout(item.getLayoutType() == SummaryViewData.LayoutType.LONG);
-        }
+            int subCriteriaRowCount = subCriteriaRowViews.size();
+            updateLayout(item.getLayoutType() == SummaryViewData.LayoutType.LONG, subCriteriaRowCount);}
 
-        private void updateLayout(boolean useLongLayout) {
-            fifthSubCriteriaRowView.setVisibility(useLongLayout ? View.VISIBLE : View.GONE);
+        private void updateLayout(boolean useLongLayout, int subCriteriaRowCount) {
+            subCriteriaRowViews.get(subCriteriaRowCount - 1).setVisibility(useLongLayout ? View.VISIBLE : View.GONE);
 
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) subCriteriaTotalView.getLayoutParams();
-            lp.weight = useLongLayout ? subCriteriaTotalWeightShort : subCriteriaTotalWeightLong;
-            subCriteriaTotalView.setLayoutParams(lp);
-            subCriteriaTotalView.requestLayout();
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) subCriteriaRowViews.get(0).getLayoutParams();
+            lp.weight = useLongLayout ? subCriteriaRowWeightShort : subCriteriaRowWeightLong;
+            for (View subCriteriaView : subCriteriaRowViews) {
+                subCriteriaView.setLayoutParams(lp);
+            }
         }
     }
 
     class HeaderViewHolder extends ViewHolder {
 
-        private TextView headerTextView;
+        private TextView headerTextView = findViewById(R.id.textview_header_name);
 
         HeaderViewHolder(ViewGroup parent) {
             super(parent, R.layout.item_fsm_summary_sticky_header);
-            bindViews();
-        }
-
-        private void bindViews() {
-            headerTextView = findViewById(R.id.textview_header_name);
         }
 
         @Override

@@ -9,6 +9,7 @@ import com.omegar.mvp.InjectViewState;
 import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.app_support.MicronesiaApplication;
 import org.pacific_emis.surveys.core.preferences.LocalSettings;
+import org.pacific_emis.surveys.core.preferences.entities.OperatingMode;
 import org.pacific_emis.surveys.core.preferences.entities.SurveyType;
 import org.pacific_emis.surveys.core.utils.UuidUtil;
 import org.pacific_emis.surveys.offline_sync.domain.OfflineSyncUseCase;
@@ -35,6 +36,9 @@ public class MainMenuPresenter extends BaseBluetoothPresenter<MainMenuView> {
     @Nullable
     private String userEmail;
 
+    @Nullable
+    private OperatingMode showedOperationMode;
+
     public MainMenuPresenter() {
         super(MicronesiaApplication.getInjection().getOfflineSyncComponent().getAccessor());
         updateUserData();
@@ -43,7 +47,7 @@ public class MainMenuPresenter extends BaseBluetoothPresenter<MainMenuView> {
     @Override
     public void attachView(MainMenuView view) {
         super.attachView(view);
-        getViewState().setIcon(localSettings.getLogo());
+        getViewState().setIcon(localSettings.getLogo(), localSettings.getDefaultLogo());
         getViewState().setTitle(localSettings.getAppName());
     }
 
@@ -121,5 +125,13 @@ public class MainMenuPresenter extends BaseBluetoothPresenter<MainMenuView> {
         }
         userEmail = remoteStorageAccessor.getUserEmail();
         getViewState().setAccountName(userEmail);
+    }
+
+    public void onForeground() {
+        OperatingMode currentOperationMode = localSettings.getOperatingMode();
+        if (currentOperationMode != showedOperationMode) {
+            showedOperationMode = currentOperationMode;
+            getViewState().setOperationModeAtSettings(currentOperationMode.getName());
+        }
     }
 }

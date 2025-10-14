@@ -10,7 +10,10 @@ import org.pacific_emis.surveys.core.R;
 
 public enum AppRegion implements Serializable {
     FSM(0, Text.from(R.string.region_fsm)),
-    RMI(1, Text.from(R.string.region_rmi));
+    RMI(1, Text.from(R.string.region_rmi)),
+    PAC(2, Text.from(R.string.region_pac)),
+    KEM(3, Text.from(R.string.region_kem)),
+    PAL(4, Text.from(R.string.region_pal));
 
     private final int value;
     private final Text name;

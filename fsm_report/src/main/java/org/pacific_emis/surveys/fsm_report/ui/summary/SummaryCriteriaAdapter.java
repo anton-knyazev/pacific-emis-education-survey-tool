@@ -40,7 +40,6 @@ public class SummaryCriteriaAdapter extends BaseListAdapter<SummaryViewData.Crit
 
         private TextView titleTextView;
         private TextView totalTextView;
-        private View totalView;
         private List<TextView> cellTextViews = new ArrayList<>();
 
         ItemViewHolder(ViewGroup parent) {
@@ -51,7 +50,6 @@ public class SummaryCriteriaAdapter extends BaseListAdapter<SummaryViewData.Crit
         private void bindViews() {
             titleTextView = findViewById(R.id.textview_criteria_title);
             totalTextView = findViewById(R.id.textview_total);
-            totalView = findViewById(R.id.layout_subcriteria_total);
             for (int cellId : cellIds) {
                 cellTextViews.add(findViewById(cellId));
             }
@@ -73,10 +71,11 @@ public class SummaryCriteriaAdapter extends BaseListAdapter<SummaryViewData.Crit
         private void updateLayout(boolean useLongLayout, int cellsCount) {
             cellTextViews.get(cellsCount - 1).setVisibility(useLongLayout ? View.VISIBLE : View.GONE);
 
-            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) totalView.getLayoutParams();
+            LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) cellTextViews.get(0).getLayoutParams();
             lp.weight = useLongLayout ? subCriteriaTotalWeightShort : subCriteriaTotalWeightLong;
-            totalView.setLayoutParams(lp);
-            totalView.requestLayout();
+            for (View cellView : cellTextViews) {
+                cellView.setLayoutParams(lp);
+            }
         }
 
         private boolean isAnsweredAt(int index) {

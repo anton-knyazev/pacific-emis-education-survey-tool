@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.google.firebase.crashlytics'
 apply plugin: 'com.google.gms.google-services'
 
+def VERSION_NAME = System.getenv("VERSION_ALIAS") as String ?: "Dev"
+
 android {
     compileSdkVersion Versions.compileSdk
     defaultConfig {
@@ -17,13 +19,47 @@ android {
         buildConfigField "String", "SURVEY_SA_FSM_FILE_NAME", "\"survey_sa_fsm.xml\""
         buildConfigField "String", "SURVEY_SA_RMI_FILE_NAME", "\"survey_sa_rmi_v2.xml\""
         buildConfigField "String", "SURVEY_WASH_FSM_FILE_NAME", "\"survey_wash_fsm.xml\""
+        buildConfigField "String", "SURVEY_WASH_KEM_FILE_NAME", "\"survey_wash_kem.xml\""
         buildConfigField "String", "SURVEY_WASH_RMI_FILE_NAME", "\"survey_wash_rmi.xml\""
         buildConfigField "String", "SCHOOLS_FSM_FILE_NAME", "\"schools_fsm.csv\""
         buildConfigField "String", "SCHOOLS_RMI_FILE_NAME", "\"schools_rmi.csv\""
         buildConfigField "String", "LICENSE_FILE_NAME", "\"license.txt\""
 
-        buildConfigField "String", "VERSION_ALIAS", "\"" + (System.getenv("VERSION_ALIAS") as String ?: "Dev") + "\""
+        buildConfigField "String", "VERSION_ALIAS", "\"" + VERSION_NAME + "\""
+
+        archivesBaseName = System.getenv("BASE_APK_NAME") as String ?: "app"
     }
+
+    flavorDimensions "country"
+    productFlavors {
+        Fedemis {
+            dimension "country"
+            applicationId "fm.doe.surveys"
+            buildConfigField "org.pacific_emis.surveys.core.preferences.entities.AppRegion", "APP_REGION", "org.pacific_emis.surveys.core.preferences.entities.AppRegion.values()[0]"
+        }
+        Miemis {
+            dimension "country"
+            applicationId "mh.edu.pss.surveys"
+            buildConfigField "org.pacific_emis.surveys.core.preferences.entities.AppRegion", "APP_REGION", "org.pacific_emis.surveys.core.preferences.entities.AppRegion.values()[1]"
+        }
+        Pacemis {
+            dimension "country"
+            applicationId "org.pacific_emis.surveys"
+            buildConfigField "org.pacific_emis.surveys.core.preferences.entities.AppRegion", "APP_REGION", "org.pacific_emis.surveys.core.preferences.entities.AppRegion.values()[2]"
+        }
+        Kemis {
+            dimension "country"
+            applicationId "ki.gov.moe.surveys"
+            buildConfigField "org.pacific_emis.surveys.core.preferences.entities.AppRegion", "APP_REGION", "org.pacific_emis.surveys.core.preferences.entities.AppRegion.values()[3]"
+        }
+        Palemis {
+            dimension "country"
+            applicationId "net.palaumoe.survey"
+            buildConfigField "org.pacific_emis.surveys.core.preferences.entities.AppRegion", "APP_REGION", "org.pacific_emis.surveys.core.preferences.entities.AppRegion.values()[4]"
+        }
+    }
+
+
     signingConfigs {
         release {
             keyAlias System.getenv("KEY_ALIAS") ?: "KEY_ALIAS"
@@ -42,6 +78,12 @@ android {
         debug {
             versionNameSuffix "-debug"
             signingConfig signingConfigs.debug
+        }
+        staging {
+            debuggable true
+            versionNameSuffix "-staging"
+            signingConfig signingConfigs.debug
+            matchingFallbacks = ['debug', 'release']
         }
         release {
             minifyEnabled Dex.minifyEnabled
@@ -82,6 +124,7 @@ dependencies {
 
     // Moxy
     implementation "com.github.Omega-R.OmegaMoxy:moxy-androidx:${Deps.moxy}"
+    implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     annotationProcessor "com.github.Omega-R.OmegaMoxy:moxy-compiler:${Deps.moxy}"
 
     // RxJava2
@@ -126,4 +169,3 @@ dependencies {
 
     annotationProcessor "com.github.bumptech.glide:compiler:${Deps.glide}"
 }
-apply plugin: 'com.google.gms.google-services'

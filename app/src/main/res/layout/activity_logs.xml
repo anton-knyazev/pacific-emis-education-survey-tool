@@ -1,64 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:ignore="MissingConstraints">
 
     <include layout="@layout/include_appbar" />
 
-    <RelativeLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="64dp"
         android:background="@color/white"
         android:elevation="4dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/textview_date"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginStart="18dp"
-            android:text="@string/title_id_and_date"
-            android:textAppearance="@style/Text.Title1" />
+            android:gravity="start"
+            android:paddingStart="16dp"
+            android:text="@string/title_date"
+            android:textAppearance="@style/Text.Title1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.12" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/textview_school"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:gravity="start"
+            android:paddingStart="8dp"
             android:text="@string/title_school"
-            android:layout_marginStart="117dp"
-            android:textAppearance="@style/Text.Title1" />
+            android:textAppearance="@style/Text.Title1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textview_date"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.45" />
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
-            android:layout_alignParentEnd="true"
-            android:layout_marginEnd="295dp"
-            android:text="@string/title_email"
-            android:textAppearance="@style/Text.Title1" />
-
-        <TextView
-            android:layout_width="wrap_content"
+            android:id="@+id/textview_period"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="132dp"
+            android:gravity="center"
+            android:text="@string/title_period"
+            android:textAppearance="@style/Text.Title1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textview_school"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.17" />
+
+        <TextView
+            android:id="@+id/textview_type"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:gravity="start"
+            android:paddingStart="8dp"
             android:text="@string/title_type"
-            android:textAppearance="@style/Text.Title1" />
+            android:textAppearance="@style/Text.Title1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/textview_period"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.1" />
 
         <TextView
+            android:id="@+id/textview_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_marginEnd="16dp"
-            android:text="@string/title_status"
-            android:textAppearance="@style/Text.Title1" />
+            android:text="@string/title_description"
+            android:paddingEnd="16dp"
+            android:textAppearance="@style/Text.Title1"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_percent="0.16" />
 
-    </RelativeLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.omega_r.libs.omegarecyclerview.OmegaRecyclerView
         android:id="@+id/recyclerview_logs"

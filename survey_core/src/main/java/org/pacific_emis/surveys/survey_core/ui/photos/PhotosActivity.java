@@ -3,6 +3,7 @@ package org.pacific_emis.surveys.survey_core.ui.photos;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -98,20 +99,29 @@ public abstract class PhotosActivity extends BaseActivity implements
 
     @Override
     public void takePictureTo(@NonNull File file) {
-        PackageManager pm = getPackageManager();
-
-        if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            showToast(Text.from(R.string.error_take_picture));
-            getPresenter().onTakePhotoFailure();
-            return;
-        }
-
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(pm) != null) {
-            Uri photoURI = FileProvider.getUriForFile(this, Constants.AUTHORITY_FILE_PROVIDER, file);
-            takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-            startActivityForResult(takePictureIntent, REQUEST_CAMERA);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startCamera(takePictureIntent, file);
+        } else {
+            PackageManager pm = getPackageManager();
+
+            if (!pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
+                showToast(Text.from(R.string.error_take_picture));
+                getPresenter().onTakePhotoFailure();
+                return;
+            }
+
+            if (takePictureIntent.resolveActivity(pm) != null) {
+                startCamera(takePictureIntent, file);
+            }
         }
+    }
+
+    private void startCamera(Intent takePictureIntent, File file) {
+        Uri photoURI = FileProvider.getUriForFile(this, getPackageName() + Constants.AUTHORITY_FILE_PROVIDER_SUFFIX, file);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+        startActivityForResult(takePictureIntent, REQUEST_CAMERA);
     }
 
     @Override

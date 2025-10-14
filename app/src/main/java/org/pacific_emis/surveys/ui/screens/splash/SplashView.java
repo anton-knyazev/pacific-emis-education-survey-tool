@@ -11,9 +11,6 @@ public interface SplashView extends BaseView {
     void navigateToMasterPassword();
 
     @StateStrategyType(OneExecutionStateStrategy.class)
-    void navigateToRegionChoose();
-
-    @StateStrategyType(OneExecutionStateStrategy.class)
     void navigateToMenu();
 
     @StateStrategyType(OneExecutionStateStrategy.class)

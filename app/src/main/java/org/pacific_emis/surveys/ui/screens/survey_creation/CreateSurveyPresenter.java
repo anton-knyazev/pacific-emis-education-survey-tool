@@ -7,8 +7,10 @@ import com.omegar.mvp.InjectViewState;
 import org.pacific_emis.surveys.app_support.MicronesiaApplication;
 import org.pacific_emis.surveys.core.data.local_data_source.DataSource;
 import org.pacific_emis.surveys.core.data.model.School;
+import org.pacific_emis.surveys.core.data.model.Survey;
 import org.pacific_emis.surveys.core.domain.SurveyInteractor;
 import org.pacific_emis.surveys.core.preferences.LocalSettings;
+import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.ui.screens.base.BasePresenter;
 import org.pacific_emis.surveys.core.utils.DateUtils;
 import org.pacific_emis.surveys.remote_storage.data.accessor.RemoteStorageAccessor;
@@ -75,14 +77,14 @@ public class CreateSurveyPresenter extends BasePresenter<CreateSurveyView> {
     void onContinuePressed() {
         addDisposable(
                 dataSource.createSurvey(
-                        selectedSchool.getId(),
-                        selectedSchool.getName(),
-                        new Date(),
-                        DateUtils.formatDateTag(surveyDate),
-                        remoteStorageAccessor.getUserEmail(),
-                        localSettings.getCurrentAppRegion(),
-                        localSettings.getTabletId()
-                )
+                                selectedSchool.getId(),
+                                selectedSchool.getName(),
+                                new Date(),
+                                DateUtils.formatDateTag(surveyDate),
+                                remoteStorageAccessor.getUserEmail(),
+                                localSettings.getCurrentAppRegion(),
+                                localSettings.getTabletId()
+                        )
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(disposable -> getViewState().showWaiting())
@@ -90,8 +92,18 @@ public class CreateSurveyPresenter extends BasePresenter<CreateSurveyView> {
                         .subscribe(survey -> {
                             accreditationSurveyInteractor.setCurrentSurvey(survey, true);
                             getViewState().navigateToSurvey();
+                            saveCreatedSurveyInfo(survey);
                         }, this::handleError)
         );
+    }
+
+    private void saveCreatedSurveyInfo(Survey survey) {
+        addDisposable(dataSource.saveLogInfo(survey, LogAction.CREATED)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(d -> getViewState().showWaiting())
+                .doFinally(() -> getViewState().hideWaiting())
+                .subscribe(() -> {}, this::handleError));
     }
 
     void onSearchQueryChanged(String query) {

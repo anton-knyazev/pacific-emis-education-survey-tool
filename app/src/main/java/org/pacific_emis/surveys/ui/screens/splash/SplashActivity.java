@@ -1,6 +1,7 @@
 package org.pacific_emis.surveys.ui.screens.splash;
 
 import android.Manifest;
+import android.os.Build;
 import android.widget.ImageView;
 
 import com.karumi.dexter.Dexter;
@@ -18,7 +19,6 @@ import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.core.ui.screens.base.BaseActivity;
 import org.pacific_emis.surveys.ui.screens.menu.MainMenuActivity;
 import org.pacific_emis.surveys.ui.screens.password.PasswordsActivity;
-import org.pacific_emis.surveys.ui.screens.region.ChooseRegionActivity;
 
 
 public class SplashActivity extends BaseActivity implements SplashView {
@@ -40,11 +40,6 @@ public class SplashActivity extends BaseActivity implements SplashView {
     }
 
     @Override
-    public void navigateToRegionChoose() {
-        startActivity(ChooseRegionActivity.createIntent(this));
-    }
-
-    @Override
     public void navigateToMenu() {
         startActivity(MainMenuActivity.createIntent(this));
         finish();
@@ -52,14 +47,38 @@ public class SplashActivity extends BaseActivity implements SplashView {
 
     @Override
     public void requestAppPermissions() {
-        String[] permissions = new String[] {
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.BLUETOOTH_ADMIN,
-                Manifest.permission.BLUETOOTH
-        };
+        String[] permissions;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions = new String[] {
+                    Manifest.permission.READ_MEDIA_IMAGES,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_ADVERTISE
+            };
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            permissions = new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_ADVERTISE
+            };
+        } else {
+            permissions = new String[] {
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                    Manifest.permission.BLUETOOTH
+            };
+        }
 
-        Dexter.withActivity(this)
+        Dexter.withContext(this)
                 .withPermissions(permissions)
                 .withListener(new MultiplePermissionsListener() {
                     @Override

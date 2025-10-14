@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_vertical"
+    android:background="@drawable/bg_popup"
+    android:paddingStart="32dp"
+    android:paddingTop="8dp"
+    android:paddingEnd="8dp"
+    android:paddingBottom="32dp"
+    tools:ignore="RtlSymmetry, MissingConstraints">
+
+    <ImageButton
+        android:id="@+id/button_close_dialog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent"
+        android:src="@drawable/ic_close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textview_title_tablet_id"
+        style="@style/Text.Title1.Large"
+        android:layout_width="450dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginEnd="16dp"
+        android:gravity="center_vertical"
+        android:paddingTop="24dp"
+        android:text="@string/title_tablet_id" />
+
+    <TextView
+        android:id="@+id/textview_tablet_id"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingEnd="16dp"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_tablet_id"
+        tools:text="e71eaf50-5e3b-42f5-ae7b-165b446df6ac" />
+
+    <TextView
+        android:id="@+id/textview_title_school_id"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/title_school_id"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_tablet_id" />
+
+    <TextView
+        android:id="@+id/textview_school_id"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_school_id"
+        tools:text="CHK001" />
+
+    <TextView
+        android:id="@+id/textview_title_period"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/title_period"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_school_id" />
+
+    <TextView
+        android:id="@+id/textview_period"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_period"
+        tools:text="2022-02-01" />
+
+    <TextView
+        android:id="@+id/textview_title_user"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="@string/title_user"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_period" />
+
+    <TextView
+        android:id="@+id/textview_user"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_tablet_id"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_tablet_id"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_user"
+        tools:text="test@omega-r.com" />
+
+    <TextView
+        android:id="@+id/textview_title_date_and_time"
+        style="@style/Text.Title1.Large"
+        android:layout_width="450dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="24dp"
+        android:paddingTop="24dp"
+        android:text="@string/title_date_and_time"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textview_title_tablet_id" />
+
+    <TextView
+        android:id="@+id/textview_date_and_time"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_date_and_time"
+        tools:text="2022-02-01 9:50 AM" />
+
+    <TextView
+        android:id="@+id/textview_title_school_name"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/title_school_name"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toTopOf="@+id/textview_title_school_id" />
+
+    <TextView
+        android:id="@+id/textview_school_name"
+        style="@style/Text.Small3"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_school_name"
+        tools:text="Parem Elementary School Chuuk" />
+
+    <TextView
+        android:id="@+id/textview_title_description"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/title_description"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toTopOf="@+id/textview_title_period" />
+
+    <TextView
+        android:id="@+id/textview_description"
+        style="@style/Text.Title2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_description"
+        tools:text="Created"
+        tools:textColor="@color/green" />
+
+    <TextView
+        android:id="@+id/textview_title_type"
+        style="@style/Text.Title1.Large"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/title_type"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toTopOf="@+id/textview_title_user" />
+
+    <TextView
+        android:id="@+id/textview_type"
+        style="@style/Text.Small3.Caps"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="@id/textview_title_date_and_time"
+        app:layout_constraintStart_toStartOf="@+id/textview_title_date_and_time"
+        app:layout_constraintTop_toBottomOf="@id/textview_title_type"
+        tools:text="WASH" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

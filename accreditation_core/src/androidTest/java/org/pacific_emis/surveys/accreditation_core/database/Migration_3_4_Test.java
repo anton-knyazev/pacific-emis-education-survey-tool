@@ -1,6 +1,5 @@
 package org.pacific_emis.surveys.accreditation_core.database;
 
-import static org.pacific_emis.surveys.accreditation_core.data.persistence.AccreditationDatabase.MIGRATION_2_3;
 import static org.pacific_emis.surveys.accreditation_core.data.persistence.AccreditationDatabase.MIGRATION_3_4;
 
 import androidx.room.testing.MigrationTestHelper;

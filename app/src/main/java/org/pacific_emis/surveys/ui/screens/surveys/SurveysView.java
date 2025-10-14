@@ -22,6 +22,9 @@ interface SurveysView extends BaseBluetoothView {
     @StateStrategyType(OneExecutionStateStrategy.class)
     void navigateToSurvey();
 
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void navigateToPairedDevices(Survey survey);
+
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setSurveys(List<Survey> accreditations);
 

@@ -5,8 +5,9 @@ import com.omega_r.libs.omegatypes.Text;
 import org.pacific_emis.surveys.core.R;
 
 public enum OperatingMode {
-    DEV(0, Text.from(R.string.op_mode_dev), "Development"),
-    PROD(1, Text.from(R.string.op_mode_prod), "Production");
+    TEST(0, Text.from(R.string.op_mode_dev), "Development"),
+    PROD(1, Text.from(R.string.op_mode_prod), "Production"),
+    TRAIN(2, Text.from(R.string.op_mode_train), "Training");
 
     private final Text name;
     private final String serializedName;
@@ -18,7 +19,7 @@ public enum OperatingMode {
                 return operatingMode;
             }
         }
-        return DEV;
+        return TEST;
     }
 
     public static OperatingMode createFromSerializedName(String name) {
@@ -27,7 +28,7 @@ public enum OperatingMode {
                 return operatingMode;
             }
         }
-        return DEV;
+        return TEST;
     }
 
     OperatingMode(int value, Text name, String serializedName) {

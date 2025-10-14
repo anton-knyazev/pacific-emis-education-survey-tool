@@ -116,6 +116,7 @@ public class SettingsInteractor {
                 .andThen(fetchFsmAccreditationTemplateFromAssets())
                 .andThen(fetchRmiAccreditationTemplateFromAssets())
                 .andThen(fetchFsmWashTemplateFromAssets())
+                .andThen(fetchKemWashTemplateFromAssets())
                 .andThen(fetchRmiWashTemplateFromAssets());
     }
 
@@ -142,6 +143,10 @@ public class SettingsInteractor {
 
     private Completable fetchFsmWashTemplateFromAssets() {
         return fetchWashTemplateFromAssets(BuildConfig.SURVEY_WASH_FSM_FILE_NAME);
+    }
+
+    private Completable fetchKemWashTemplateFromAssets() {
+        return fetchWashTemplateFromAssets(BuildConfig.SURVEY_WASH_KEM_FILE_NAME);
     }
 
     private Completable fetchRmiWashTemplateFromAssets() {
@@ -188,7 +193,6 @@ public class SettingsInteractor {
         private final DataSource dataRepository;
         private final DataSource accreditationDataSource;
         private final DataSource washDataSource;
-        private final LocalSettings localSettings;
         private final Parser<Survey> accreditationSurveyParser;
         private final Parser<Survey> washSurveyParser;
         private final AssetManager assetManager;
@@ -196,14 +200,12 @@ public class SettingsInteractor {
         public SurveyAccessor(DataSource dataRepository,
                               DataSource accreditationDataSource,
                               DataSource washDataSource,
-                              LocalSettings localSettings,
                               Parser<Survey> accreditationSurveyParser,
                               Parser<Survey> washSurveyParser,
                               AssetManager assetManager) {
             this.dataRepository = dataRepository;
             this.accreditationDataSource = accreditationDataSource;
             this.washDataSource = washDataSource;
-            this.localSettings = localSettings;
             this.accreditationSurveyParser = accreditationSurveyParser;
             this.washSurveyParser = washSurveyParser;
             this.assetManager = assetManager;
@@ -235,13 +237,13 @@ public class SettingsInteractor {
             Survey survey = tryParseAccreditation(content);
 
             if (survey != null) {
-                return accreditationDataSource.createPartiallySavedSurvey(localSettings.getCurrentAppRegion(), survey);
+                return accreditationDataSource.createPartiallySavedSurvey(BuildConfig.APP_REGION, survey);
             }
 
             survey = tryParseWash(content);
 
             if (survey != null) {
-                return washDataSource.createPartiallySavedSurvey(localSettings.getCurrentAppRegion(), survey);
+                return washDataSource.createPartiallySavedSurvey(BuildConfig.APP_REGION, survey);
             }
 
             throw new ParseException();

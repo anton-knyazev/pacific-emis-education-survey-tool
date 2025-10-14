@@ -1,11 +1,8 @@
 package org.pacific_emis.surveys.offline_sync.domain;
 
-import android.app.Activity;
-
 import org.pacific_emis.surveys.core.data.model.Survey;
 import org.pacific_emis.surveys.core.utils.LifecycleListener;
 import org.pacific_emis.surveys.offline_sync.data.accessor.OfflineAccessor;
-import org.pacific_emis.surveys.offline_sync.ui.devices.PairedDevicesActivity;
 import io.reactivex.Completable;
 
 public class OfflineSyncUseCaseImpl implements OfflineSyncUseCase, OfflineAccessor.SyncUseCase {
@@ -25,22 +22,11 @@ public class OfflineSyncUseCaseImpl implements OfflineSyncUseCase, OfflineAccess
     @Override
     public void executeAsInitiator(Survey survey) {
         targetSurvey = survey;
-        selectDevice();
     }
 
     @Override
     public Completable executeAsReceiver() {
         return offlineAccessor.becomeAvailableToConnect();
-    }
-
-    private void selectDevice() {
-        Activity activity = lifecycleListener.getCurrentActivity();
-
-        if (activity == null) {
-            return;
-        }
-
-        activity.startActivity(PairedDevicesActivity.createIntent(activity));
     }
 
     @Override

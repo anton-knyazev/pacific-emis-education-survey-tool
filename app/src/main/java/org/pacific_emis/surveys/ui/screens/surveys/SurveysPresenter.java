@@ -11,6 +11,7 @@ import com.omegar.mvp.InjectViewState;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.pacific_emis.surveys.R;
@@ -58,7 +59,7 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
     private Survey surveyToDelete;
     private Survey surveyToChangeDate;
 
-    private boolean requestLoadPartiallySavedSurvey;
+    private boolean requestLoadPartiallySavedSurvey = false;
 
     public SurveysPresenter() {
         super(MicronesiaApplication.getInjection().getOfflineSyncComponent().getAccessor());
@@ -92,6 +93,10 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
                 .doOnSubscribe(disposable -> getViewState().showWaiting())
                 .doFinally(() -> getViewState().hideWaiting())
                 .subscribe(surveys -> {
+                    if (this.surveys.size() != surveys.size() && requestLoadPartiallySavedSurvey) {
+                        requestLoadPartiallySavedSurvey = false;
+                        saveEditedSurveyInfo(surveys.get(surveys.size() - 1));
+                    }
                     this.surveys = surveys;
                     getViewState().setSurveys(new ArrayList<>(this.surveys));
                 }, this::handleError));
@@ -104,6 +109,7 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
 
     public void onSurveyMergePressed(Survey survey) {
         offlineSyncUseCase.executeAsInitiator(survey);
+        getViewState().navigateToPairedDevices(survey);
     }
 
     public void onSurveyMergedPressed(Survey survey) {
@@ -141,6 +147,7 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
         dataSource.setSurveyUploadState(survey, UploadState.IN_PROGRESS);
         loadRecentSurveys();
         remoteStorageAccessor.scheduleUploading(survey.getId());
+        saveEditedSurveyInfo(survey);
     }
 
     public void onExportAllPressed() {
@@ -166,7 +173,6 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
                                 getViewState().showMessage(Text.from(R.string.title_info), Text.from(R.string.message_nothing_to_export));
                             } else {
                                 getViewState().openInExternalApp(uri);
-//                                getViewState().showMessage(Text.from(R.string.title_info), Text.from(R.string.format_exported_to, url));
                             }
                         }, this::handleError)
         );
@@ -192,7 +198,6 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
     @Override
     protected void onMasterPasswordValidated() {
         if (requestLoadPartiallySavedSurvey) {
-            requestLoadPartiallySavedSurvey = false;
             addDisposable(settingsInteractor.createFilledSurveyFromCloud()
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
@@ -243,7 +248,7 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
                 remoteStorage.driveFileChanges(surveys, localSettings.getDrivePageToken())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::deletedDriveSurveys, Throwable::printStackTrace));
+                        .subscribe(this::deleteDriveSurveys, Throwable::printStackTrace));
     }
 
     private void fetchNewPageToken() {
@@ -262,6 +267,7 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
                 .doFinally(() -> getViewState().hideWaiting())
                 .subscribe(() -> {
                     getViewState().removeSurvey(surveyToDelete);
+                    saveDeletedSurveyInfo(surveyToDelete);
                     surveyToDelete = null;
                 }, this::handleError));
     }
@@ -269,17 +275,36 @@ public class SurveysPresenter extends BaseBluetoothPresenter<SurveysView> {
     private void changeDateSurvey() {
         getViewState().showInputDialog(
                 Text.from(R.string.title_change_date_survey),
-                Text.from(surveyToChangeDate.getSurveyTag()),
+                Text.from(Objects.requireNonNull(surveyToChangeDate.getSurveyTag())),
                 (date) -> {
                     surveyToChangeDate.toMutable().setSurveyTag(date);
                     dataSource.setSurveyUploadState(surveyToChangeDate, UploadState.NOT_UPLOAD);
+                    saveEditedSurveyInfo(surveyToChangeDate);
                     loadRecentSurveys();
                     remoteStorageAccessor.scheduleUploading(surveyToChangeDate.getId());
                 }
         );
     }
 
-    private void deletedDriveSurveys(List<Survey> result) {
+    public void saveEditedSurveyInfo(Survey survey) {
+        addDisposable(dataSource.saveLogInfo(survey, LogAction.EDITED)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(d -> getViewState().showWaiting())
+                .doFinally(() -> getViewState().hideWaiting())
+                .subscribe(() -> {}, this::handleError));
+    }
+
+    private void saveFetchedSurveyInfo(Survey survey) {
+        addDisposable(dataSource.saveLogInfo(survey, LogAction.FETCH)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(d -> getViewState().showWaiting())
+                .doFinally(() -> getViewState().hideWaiting())
+                .subscribe(() -> {}, this::handleError));
+    }
+
+    private void deleteDriveSurveys(List<Survey> result) {
         if (localSettings.isDeletingCloudFileModeEnabled()) {
             if (!result.isEmpty()) {
                 result.forEach(this::deleteSurvey);

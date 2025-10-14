@@ -15,8 +15,8 @@ import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.omega_r.libs.omegatypes.Text;
@@ -32,6 +32,7 @@ import org.pacific_emis.surveys.core.ui.screens.base.BaseAdapter;
 import org.pacific_emis.surveys.core.ui.screens.base.BasePresenter;
 import org.pacific_emis.surveys.core.ui.views.InputDialog;
 import org.pacific_emis.surveys.offline_sync.ui.base.BaseBluetoothActivity;
+import org.pacific_emis.surveys.offline_sync.ui.devices.PairedDevicesActivity;
 import org.pacific_emis.surveys.survey.ui.SurveyActivity;
 import org.pacific_emis.surveys.ui.screens.menu.MainMenuActivity;
 import org.pacific_emis.surveys.ui.screens.survey_creation.CreateSurveyActivity;
@@ -40,10 +41,12 @@ public class SurveysActivity extends BaseBluetoothActivity implements
         SurveysView,
         View.OnClickListener,
         BaseAdapter.OnItemClickListener<Survey>,
+        SwipeRefreshLayout.OnRefreshListener,
         SurveysAdapter.ItemClickListener {
 
     private static final String TAG = SurveysActivity.class.getName();
     private static final String SCHEME_WEB = "http";
+    private static final int REQUEST_CODE_SYNC = 888;
 
     @InjectPresenter
     SurveysPresenter presenter;
@@ -61,6 +64,7 @@ public class SurveysActivity extends BaseBluetoothActivity implements
 
     private MenuItem exportAllMenuItem;
     private boolean isExportEnabled;
+    private Survey currentSurvey;
 
     @Nullable
     private Dialog inputDialog;
@@ -115,6 +119,26 @@ public class SurveysActivity extends BaseBluetoothActivity implements
     @Override
     public void navigateToSurvey() {
         startActivity(new Intent(this, SurveyActivity.class));
+    }
+
+    @Override
+    public void navigateToPairedDevices(Survey survey) {
+        currentSurvey = survey;
+        startActivityForResult(PairedDevicesActivity.createIntent(this), REQUEST_CODE_SYNC);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        switch (requestCode) {
+            case REQUEST_CODE_SYNC:
+                if (resultCode == RESULT_OK) {
+                    presenter.saveEditedSurveyInfo(currentSurvey);
+                }
+                break;
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
     }
 
     @Override
@@ -243,6 +267,11 @@ public class SurveysActivity extends BaseBluetoothActivity implements
     public void showInputDialog(@Nullable Text title, @Nullable Text existingText, InputListener listener) {
         inputDialog = InputDialog.create(this, title, existingText, true).setListener(listener::onInput);
         inputDialog.show();
+    }
+
+    @Override
+    public void onRefresh() {
+        //nothing
     }
 
 }

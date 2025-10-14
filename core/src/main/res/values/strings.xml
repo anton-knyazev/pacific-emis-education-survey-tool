@@ -10,6 +10,7 @@
     <string name="error_import">Survey importing failed</string>
     <string name="error_picker">Picker action failed</string>
     <string name="error_any">Some error occurred</string>
+    <string name="error_null_pointer_exeption">The callable returned a null value</string>
     <string name="error_parse">Failed to parse file</string>
     <string name="error_wrong_region">Incorrect region context</string>
     <string name="error_permissions">You need to grant all permissions to the application</string>
@@ -126,9 +127,13 @@
 
     <string name="region_fsm">FedEMIS</string>
     <string name="region_rmi">MIEMIS</string>
+    <string name="region_pac">PacEMIS</string>
+    <string name="region_pal">PalEMIS</string>
+    <string name="region_kem">KEMIS</string>
 
-    <string name="op_mode_dev">Development</string>
+    <string name="op_mode_dev">Testing</string>
     <string name="op_mode_prod">Production</string>
+    <string name="op_mode_train">Training</string>
     <string name="message_invalid_password">Invalid password</string>
     <string name="message_delete_password_prompt">Confirm survey removal with master password</string>
     <string name="message_settings_password_prompt">Enter Master Password to access Settings</string>
@@ -144,6 +149,9 @@
     <string name="log_action_created">Created</string>
     <string name="log_action_edited">Edited</string>
     <string name="log_action_deleted">Deleted</string>
+    <string name="log_action_merged_to">Merged To</string>
+    <string name="log_action_merged_from">Merged From</string>
+    <string name="log_action_fetch">Fetch</string>
     <string name="title_survey_type_school_accreditation">sa</string>
     <string name="title_survey_type_wash">wash</string>
 </resources>

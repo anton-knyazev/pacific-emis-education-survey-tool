@@ -1,5 +1,7 @@
 package org.pacific_emis.surveys.core.preferences;
 
+import static org.pacific_emis.surveys.core.preferences.entities.AppRegion.FSM;
+
 import android.content.SharedPreferences;
 
 import androidx.annotation.NonNull;
@@ -12,16 +14,12 @@ import com.omega_r.libs.omegatypes.image.UrlImage;
 
 import org.pacific_emis.surveys.core.BuildConfig;
 import org.pacific_emis.surveys.core.R;
-import org.pacific_emis.surveys.core.data.exceptions.NotImplementedException;
 import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.OperatingMode;
 import org.pacific_emis.surveys.core.preferences.entities.SurveyType;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.pacific_emis.surveys.core.preferences.entities.AppRegion.FSM;
-import static org.pacific_emis.surveys.core.preferences.entities.AppRegion.RMI;
 
 public class LocalSettingsImpl implements LocalSettings {
 
@@ -44,18 +42,56 @@ public class LocalSettingsImpl implements LocalSettings {
     private static final String PREF_KEY_DRIVE_PAGE_TOKEN = "PREF_KEY_DRIVE_PAGE_TOKEN";
 
     private static final String PREF_KEY_OPERATING_MODE = "PREF_KEY_OPERATING_MODE";
-    private static final OperatingMode DEFAULT_OPERATING_MODE = OperatingMode.DEV;
+    private static final OperatingMode DEFAULT_OPERATING_MODE = OperatingMode.TEST;
 
     private static final Image sDefaultIconFsm = new ResourceImage(R.drawable.ic_fsm);
     private static final Image sDefaultIconRmi = new ResourceImage(R.drawable.ic_rmi);
+    private static final Image sDefaultIconPac = new ResourceImage(R.drawable.ic_pac);
 
     private static final String PREF_KEY_EXCEL_EXPORT = "PREF_KEY_EXCEL_EXPORT";
-    private static final String PREF_KEY_PROD_CERT = "PREF_KEY_PROD_CERT";
+    private static final String PREF_KEY_SERVICE_ACCOUNT_DEV = "PREF_KEY_SERVICE_ACCOUNT_DEV";
+    private static final String PREF_KEY_SERVICE_ACCOUNT_TRAIN = "PREF_KEY_SERVICE_ACCOUNT_TRAIN";
+    private static final String PREF_KEY_SERVICE_ACCOUNT_PROD = "PREF_KEY_SERVICE_ACCOUNT_PROD";
     private static final String PREF_KEY_DELETING_CLOUDFILE_MODE = "PREF_KEY_DELETING_CLOUDFILE_MODE";
 
-    private final static Map<AppRegion, String> API_URLS_MAP = new HashMap<AppRegion, String>() {{
-        put(RMI, "http://data.pss.edu.mh/miemis/api/");
-        put(FSM, "https://fedemis.doe.fm/api/");
+    private static final String PREF_KEY_APP_VERSION = "PREF_KEY_APP_VERSION";
+
+    private static final Map<OperatingMode, String> PREFS_MAP_KEY_SHARED_FOLDER_ID = new HashMap<OperatingMode, String>() {{
+        for (OperatingMode mode: OperatingMode.values()) {
+            switch (mode) {
+                case TEST:
+                    put(mode, "PREF_KEY_SHARED_FOLDER_ID_TEST");
+                    break;
+                case PROD:
+                    put(mode, "PREF_KEY_SHARED_FOLDER_ID_PROD");
+                    break;
+                case TRAIN:
+                    put(mode, "PREF_KEY_SHARED_FOLDER_ID_TRAIN");
+                    break;
+            }
+        }
+    }};
+
+    private final static Map<AppRegion, String> DEFAULT_API_URLS_MAP = new HashMap<AppRegion, String>() {{
+        for(AppRegion region: AppRegion.values()) {
+            switch (region) {
+                case FSM:
+                    put(region, "https://fedemis.doe.fm/api/");
+                    break;
+                case RMI:
+                    put(region, "http://data.pss.edu.mh/miemis/api/");
+                    break;
+                case PAC:
+                    put(region, "https://pacemis.pacific-emis.org/api/");
+                    break;
+                case KEM:
+                    put(region, "https://kemis.moe.gov.ki/api/");
+                    break;
+                case PAL:
+                    put(region, "https://palemis.pacific-emis.org/api/");
+                    break;
+            }
+        }
     }};
 
     private final SharedPreferences sharedPreferences;
@@ -95,12 +131,30 @@ public class LocalSettingsImpl implements LocalSettings {
         }
 
         switch (getCurrentAppRegion()) {
-            case FSM:
-                return sDefaultIconFsm;
             case RMI:
                 return sDefaultIconRmi;
+            case PAC:
+                return sDefaultIconPac;
+            case KEM:
+            case PAL:
+            case FSM:
             default:
-                throw new NotImplementedException();
+                return sDefaultIconFsm;
+        }
+    }
+
+    @Override
+    public int getDefaultLogo() {
+        switch (getCurrentAppRegion()) {
+            case RMI:
+                return R.drawable.ic_rmi;
+            case PAC:
+                return R.drawable.ic_pac;
+            case KEM:
+            case PAL:
+            case FSM:
+            default:
+                return R.drawable.ic_fsm;
         }
     }
 
@@ -146,7 +200,7 @@ public class LocalSettingsImpl implements LocalSettings {
 
     @Nullable
     private String getSavedMasterPassword() {
-        return sharedPreferences.getString(PREF_KEY_MASTER_PASSWORD, null);
+        return sharedPreferences.getString(PREF_KEY_MASTER_PASSWORD, BuildConfig.FACTORY_PASSWORD);
     }
 
     @Override
@@ -235,14 +289,36 @@ public class LocalSettingsImpl implements LocalSettings {
     }
 
     @Override
-    public void setProdCert(String cert) {
-        sharedPreferences.edit().putString(PREF_KEY_PROD_CERT, cert).apply();
+    public void setServiceAccountKeyDev(String key) {
+        sharedPreferences.edit().putString(PREF_KEY_SERVICE_ACCOUNT_DEV, key).apply();
     }
 
     @Nullable
     @Override
-    public String getProdCert() {
-        return sharedPreferences.getString(PREF_KEY_PROD_CERT, null);
+    public String getServiceAccountKeyDev() {
+        return sharedPreferences.getString(PREF_KEY_SERVICE_ACCOUNT_DEV, null);
+    }
+
+    @Override
+    public void setServiceAccountKeyProd(String key) {
+        sharedPreferences.edit().putString(PREF_KEY_SERVICE_ACCOUNT_PROD, key).apply();
+    }
+
+    @Nullable
+    @Override
+    public String getServiceAccountKeyProd() {
+        return sharedPreferences.getString(PREF_KEY_SERVICE_ACCOUNT_PROD, null);
+    }
+
+    @Override
+    public void setServiceAccountKeyTrain(String key) {
+        sharedPreferences.edit().putString(PREF_KEY_SERVICE_ACCOUNT_TRAIN, key).apply();
+    }
+
+    @Nullable
+    @Override
+    public String getServiceAccountKeyTrain() {
+        return sharedPreferences.getString(PREF_KEY_SERVICE_ACCOUNT_TRAIN, null);
     }
 
     @Override
@@ -253,11 +329,7 @@ public class LocalSettingsImpl implements LocalSettings {
     @Override
     public String getEmisApiUrl() {
         String emisUrl = sharedPreferences.getString(PREF_KEY_EMIS_API, null);
-        if (emisUrl != null) {
-            return emisUrl;
-        } else {
-            return API_URLS_MAP.get(getCurrentAppRegion());
-        }
+        return emisUrl != null ? emisUrl : DEFAULT_API_URLS_MAP.get(getCurrentAppRegion());
     }
 
     @Override
@@ -331,5 +403,25 @@ public class LocalSettingsImpl implements LocalSettings {
     @Override
     public void setDeletingCloudFileModeEnabled(boolean enabled) {
         sharedPreferences.edit().putBoolean(PREF_KEY_DELETING_CLOUDFILE_MODE, enabled).apply();
+    }
+
+    @Override
+    public void setGoogleDriveSharedFolderId(OperatingMode mode, String folderId) {
+        sharedPreferences.edit().putString(PREFS_MAP_KEY_SHARED_FOLDER_ID.get(mode), folderId).apply();
+    }
+
+    @Override
+    public String getGoogleDriveSharedFolderId(OperatingMode mode) {
+        return sharedPreferences.getString(PREFS_MAP_KEY_SHARED_FOLDER_ID.get(mode), null);
+    }
+
+    @Override
+    public int getCurrentVersionCode() {
+        return sharedPreferences.getInt(PREF_KEY_APP_VERSION, 0);
+    }
+
+    @Override
+    public void setCurrentVersionCode(int currentVersionCode) {
+        sharedPreferences.edit().putInt(PREF_KEY_APP_VERSION, currentVersionCode).apply();
     }
 }

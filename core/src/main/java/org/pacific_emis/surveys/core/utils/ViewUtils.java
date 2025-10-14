@@ -71,6 +71,12 @@ public class ViewUtils {
         }
     }
 
+    public static void setImageTo(ImageView imageView, @Nullable Image image, int placeholderResId) {
+        if (image != null) {
+            ImageKt.setImage(imageView, image, placeholderResId);
+        }
+    }
+
     public static void setTintedBackgroundDrawable(View targetView, @DrawableRes int drawableRes, @ColorRes int colorRes) {
         Context context = targetView.getContext();
         Drawable backgroundDrawable = ContextCompat.getDrawable(context, drawableRes);

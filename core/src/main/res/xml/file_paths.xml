@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <external-cache-path
+        name="proof_cache_photos"
+        path="." />
     <external-path
         name="proof_photos"
         path="Education Survey Tool" />

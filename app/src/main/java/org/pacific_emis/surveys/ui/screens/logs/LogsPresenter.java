@@ -2,10 +2,12 @@ package org.pacific_emis.surveys.ui.screens.logs;
 
 import com.omegar.mvp.InjectViewState;
 
+import org.pacific_emis.surveys.BuildConfig;
 import org.pacific_emis.surveys.app_support.MicronesiaApplication;
 import org.pacific_emis.surveys.core.data.data_repository.LogsRepository;
 import org.pacific_emis.surveys.core.data.local_data_source.DataSource;
 import org.pacific_emis.surveys.core.data.model.Survey;
+import org.pacific_emis.surveys.core.data.model.SurveyLog;
 import org.pacific_emis.surveys.core.preferences.LocalSettings;
 import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.ui.screens.base.BasePresenter;
@@ -44,10 +46,10 @@ public class LogsPresenter extends BasePresenter<LogsView> {
                 remoteStorage.driveFileChanges(surveys, localSettings.getDrivePageToken())
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(this::deletedDriveSurveys, Throwable::printStackTrace));
+                        .subscribe(this::deleteDriveSurveys, Throwable::printStackTrace));
     }
 
-    private void deletedDriveSurveys(List<Survey> result) {
+    private void deleteDriveSurveys(List<Survey> result) {
         if (localSettings.isDeletingCloudFileModeEnabled()) {
             if (!result.isEmpty()) {
                 result.forEach(this::deleteSurvey);
@@ -100,6 +102,10 @@ public class LogsPresenter extends BasePresenter<LogsView> {
                         getViewState().setLogs(logs);
                     }
                 }, this::handleError));
+    }
+
+    public void onLogPressed(SurveyLog survey) {
+        getViewState().showDetailLog(survey);
     }
 
 }

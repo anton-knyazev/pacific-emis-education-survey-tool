@@ -48,7 +48,7 @@ public class SurveysAdapter extends BaseAdapter<Survey> {
         @BindView(R.id.textview_progress)
         TextView progressTextView;
 
-        @BindView(R.id.textview_creation_date)
+        @BindView(R.id.textview_edit_date)
         TextView creationDateTextView;
 
         @BindView(R.id.progressbar)

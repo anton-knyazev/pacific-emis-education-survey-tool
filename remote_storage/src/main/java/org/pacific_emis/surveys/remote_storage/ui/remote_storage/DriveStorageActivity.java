@@ -46,12 +46,8 @@ public class DriveStorageActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (isDebugViewer()) {
-            if (presenter.isDeletingCloudFileMode()) {
-                adapter = new DriveStorageAdapter(this, this);
-            } else {
-                adapter = new DriveStorageAdapter(this);
-            }
+        if (isDebugViewer() && presenter.isDeletingCloudFileMode()) {
+            adapter = new DriveStorageAdapter(this, this);
         } else {
             adapter = new DriveStorageAdapter(this);
         }

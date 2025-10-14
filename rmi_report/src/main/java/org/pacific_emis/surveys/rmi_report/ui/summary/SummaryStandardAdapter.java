@@ -6,7 +6,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.omega_r.libs.omegarecyclerview.sticky_decoration.StickyAdapter;
@@ -15,17 +14,12 @@ import org.pacific_emis.surveys.accreditation_core.data.model.Category;
 import org.pacific_emis.surveys.accreditation_core.data.model.EvaluationForm;
 import org.pacific_emis.surveys.core.ui.screens.base.BaseAdapter;
 import org.pacific_emis.surveys.core.utils.ViewUtils;
-import org.pacific_emis.surveys.report_core.model.Level;
 import org.pacific_emis.surveys.report_core.model.SummaryViewData;
 import org.pacific_emis.surveys.rmi_report.R;
 import org.pacific_emis.surveys.rmi_report.domain.RmiReportLevel;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> implements StickyAdapter<SummaryStandardAdapter.StickyViewHolder> {
 
@@ -132,8 +126,8 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
             nameTextView.setText(item.getStandard().getTitle());
 
             totalTextView.setText(String.valueOf(item.getTotalByStandard()));
-
             levelTextView.setText(String.valueOf(item.getLevel().getValue()));
+
             ViewUtils.setTintedBackgroundDrawable(levelTextView, R.drawable.bg_level, item.getLevel().getColorRes());
 
             adapter.setItems(item.getCriteriaSummaryViewDataList());
@@ -208,7 +202,6 @@ public class SummaryStandardAdapter extends BaseAdapter<SummaryViewData> impleme
             int subCriteriaRowCount = subCriteriaRowViews.size();
             updateLayout(item.getLayoutType() == SummaryViewData.LayoutType.LONG, subCriteriaRowCount);
         }
-
         private void updateLayout(boolean useLongLayout, int subCriteriaRowCount) {
             subCriteriaRowViews.get(subCriteriaRowCount - 1).setVisibility(useLongLayout ? View.VISIBLE : View.GONE);
 

@@ -8,6 +8,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -18,7 +19,6 @@ import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.core.ui.screens.base.BaseActivity;
 import org.pacific_emis.surveys.core.ui.views.BottomNavigatorView;
 import org.pacific_emis.surveys.core.utils.TextWatcherAdapter;
-import org.pacific_emis.surveys.ui.screens.region.ChooseRegionActivity;
 
 public class PasswordsActivity extends BaseActivity implements PasswordView, BottomNavigatorView.Listener {
 
@@ -27,8 +27,9 @@ public class PasswordsActivity extends BaseActivity implements PasswordView, Bot
     @InjectPresenter
     PasswordPresenter presenter;
 
-    private View notMatchView;
-    private View passwordShortView;
+    private TextView errorEnterPasswordTextView;
+    private TextView errorConfirmPasswordTextView;
+    private Button confirmButton;
     private boolean isInSettingsContext;
 
     private final TextWatcher newPassTextWatcher = new TextWatcherAdapter() {
@@ -61,8 +62,8 @@ public class PasswordsActivity extends BaseActivity implements PasswordView, Bot
     private void bindViews() {
         setTextWatcher(R.id.textinputedittext_new_pass, newPassTextWatcher);
         setTextWatcher(R.id.textinputedittext_confirm_pass, confirmPassTextWatcher);
-        notMatchView = findViewById(R.id.textview_incorrect);
-        passwordShortView = findViewById(R.id.textview_short_password);
+        errorEnterPasswordTextView = findViewById(R.id.textview_short_password);
+        errorConfirmPasswordTextView = findViewById(R.id.textview_incorrect);
 
         BottomNavigatorView navigatorView = findViewById(R.id.bottomnavigatorview);
 
@@ -70,11 +71,8 @@ public class PasswordsActivity extends BaseActivity implements PasswordView, Bot
             navigatorView.setListener(this);
         }
 
-        Button confirmButton = findViewById(R.id.button_confirm);
-
-        if (confirmButton != null) {
-            confirmButton.setOnClickListener(v -> presenter.onConfirmPressed());
-        }
+        confirmButton = findViewById(R.id.button_confirm);
+        confirmButton.setOnClickListener(v -> presenter.onConfirmPressed());
     }
 
     private void setTextWatcher(@IdRes int idRes, TextWatcher watcher) {
@@ -87,22 +85,25 @@ public class PasswordsActivity extends BaseActivity implements PasswordView, Bot
     }
 
     @Override
-    public void setPasswordsNotMatchVisible(boolean visible) {
-        notMatchView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    public void setConfirmPasswordErrorVisible(boolean visible) {
+        errorConfirmPasswordTextView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
-    public void setPasswordTooShortVisible(boolean visible) {
-        passwordShortView.setVisibility(visible ? View.VISIBLE : View.GONE);
+    public void setEnterPasswordErrorVisible(boolean visible) {
+        errorEnterPasswordTextView.setVisibility(visible ? View.VISIBLE : View.GONE);
     }
 
     @Override
     public void navigateToRegion() {
         if (isInSettingsContext) {
             finish();
-        } else {
-            startActivity(ChooseRegionActivity.createIntent(this));
         }
+    }
+
+    @Override
+    public void setConformButtonEnabled(boolean enabled) {
+        confirmButton.setEnabled(enabled);
     }
 
     @Override

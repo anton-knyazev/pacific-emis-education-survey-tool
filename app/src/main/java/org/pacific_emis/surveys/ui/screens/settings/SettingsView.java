@@ -29,6 +29,9 @@ public interface SettingsView extends BaseView {
     void showOperatingModeSelector(OperatingModeListener listener);
 
     @StateStrategyType(OneExecutionStateStrategy.class)
+    void setDisplayOperationMode(OperatingMode operatingMode);
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void navigateToChangePassword();
 
     @StateStrategyType(OneExecutionStateStrategy.class)

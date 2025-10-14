@@ -1,21 +1,26 @@
 package org.pacific_emis.surveys.app_support;
 
 import android.app.Application;
+import android.os.Build;
 
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.microsoft.appcenter.AppCenter;
 import com.microsoft.appcenter.analytics.Analytics;
 import com.microsoft.appcenter.crashes.Crashes;
 import com.omega_r.libs.omegatypes.image.GlideImagesProcessor;
 import com.omegar.mvp.RegisterMoxyReflectorPackages;
 
+import org.pacific_emis.surveys.BuildConfig;
 import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.accreditation_core.di.AccreditationCoreComponent;
 import org.pacific_emis.surveys.accreditation_core.di.AccreditationCoreComponentProvider;
 import org.pacific_emis.surveys.app_support.di.Injection;
 import org.pacific_emis.surveys.core.di.CoreComponent;
 import org.pacific_emis.surveys.core.di.CoreComponentProvider;
+import org.pacific_emis.surveys.core.preferences.LocalSettings;
 import org.pacific_emis.surveys.data_source_injector.di.DataSourceComponent;
 import org.pacific_emis.surveys.data_source_injector.di.DataSourceComponentProvider;
+import org.pacific_emis.surveys.domain.SettingsInteractor;
 import org.pacific_emis.surveys.fsm_report.di.FsmReportComponent;
 import org.pacific_emis.surveys.fsm_report.di.FsmReportComponentProvider;
 import org.pacific_emis.surveys.offline_sync.di.OfflineSyncComponent;
@@ -35,6 +40,8 @@ import org.pacific_emis.surveys.survey_core.di.SurveyCoreComponent;
 import org.pacific_emis.surveys.survey_core.di.SurveyCoreComponentProvider;
 import org.pacific_emis.surveys.wash_core.di.WashCoreComponent;
 import org.pacific_emis.surveys.wash_core.di.WashCoreComponentProvider;
+
+import java.util.Objects;
 
 @RegisterMoxyReflectorPackages({
         "org.pacific_emis.surveys.fsm_report",
@@ -70,9 +77,10 @@ public class MicronesiaApplication extends Application implements
         injection.createDependencyGraph(this);
 
         RemoteSettings remoteSettings = provideRemoteSettingsComponent().getRemoteSettings();
-        remoteSettings.init(remoteSettings::fetchAsync);
+        remoteSettings.init(() -> remoteSettings.fetchAsync(BuildConfig.VERSION_CODE));
 
-        GlideImagesProcessor.Companion.setAsCurrentImagesProcessor();
+
+        GlideImagesProcessor.Companion.setAsCurrentImagesProcessor(null);
     }
 
     public static Injection getInjection() {

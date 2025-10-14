@@ -1,6 +1,5 @@
 package org.pacific_emis.surveys.core.data.persistence.model;
 
-
 import androidx.annotation.NonNull;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -10,6 +9,8 @@ import org.pacific_emis.surveys.core.data.model.abstract_implementations.SurveyL
 import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.preferences.entities.SurveyType;
+import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 @Entity
 public class RoomSurveyLog extends SurveyLogImpl {
@@ -22,25 +23,37 @@ public class RoomSurveyLog extends SurveyLogImpl {
     String schoolName;
     String schoolId;
     String surveyTag;
+    String surveyTime;
+    String surveyCreated;
     LogAction logAction;
     AppRegion appRegion;
 
-    public RoomSurveyLog(SurveyType surveyType, String createUser, String schoolName, String schoolId, String surveyTag, LogAction logAction, AppRegion appRegion) {
+    static SimpleDateFormat dateFormatFull = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+
+    public RoomSurveyLog(SurveyType surveyType, String createUser, String schoolName, String schoolId, String surveyTag, String surveyTime, String surveyCreated, LogAction logAction, AppRegion appRegion) {
         this.surveyType = surveyType;
         this.createUser = createUser;
         this.schoolName = schoolName;
         this.schoolId = schoolId;
         this.surveyTag = surveyTag;
+        this.surveyTime = surveyTime;
+        this.surveyCreated = surveyCreated;
         this.logAction = logAction;
         this.appRegion = appRegion;
     }
 
-    public RoomSurveyLog(Survey survey, LogAction logAction) {
+    public RoomSurveyLog(Survey survey, LogAction logAction, String surveyEdited) {
         this.surveyType = survey.getSurveyType();
         this.createUser = survey.getCreateUser();
         this.schoolName = survey.getSchoolName();
         this.schoolId = survey.getSchoolId();
         this.surveyTag = survey.getSurveyTag();
+        if (survey.getCreateDate() != null) {
+            this.surveyCreated = dateFormatFull.format(survey.getCreateDate());
+        } else {
+            this.surveyCreated = "";
+        }
+        this.surveyTime = surveyEdited;
         this.logAction = logAction;
         this.appRegion = survey.getAppRegion();
     }
@@ -73,6 +86,18 @@ public class RoomSurveyLog extends SurveyLogImpl {
     @Override
     public String getSurveyTag() {
         return surveyTag;
+    }
+
+    @NonNull
+    @Override
+    public String getSurveyTime() {
+        return surveyTime;
+    }
+
+    @NonNull
+    @Override
+    public String getSurveyCreated() {
+        return surveyCreated;
     }
 
     @Override

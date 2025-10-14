@@ -6,10 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.preferences.entities.SurveyType;
+import java.io.Serializable;
 
-import java.util.Date;
-
-public interface SurveyLog {
+public interface SurveyLog extends Serializable {
 
     @NonNull
     SurveyType getSurveyType();
@@ -25,6 +24,12 @@ public interface SurveyLog {
 
     @NotNull
     String getSurveyTag();
+
+    @NotNull
+    String getSurveyTime();
+
+    @NotNull
+    String getSurveyCreated();
 
     LogAction getLogAction();
 

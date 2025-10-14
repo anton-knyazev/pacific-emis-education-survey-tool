@@ -10,6 +10,7 @@ import org.pacific_emis.surveys.core.data.model.Photo;
 import org.pacific_emis.surveys.core.data.model.Survey;
 import org.pacific_emis.surveys.core.data.model.mutable.MutablePhoto;
 import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
+import org.pacific_emis.surveys.core.preferences.entities.SurveyType;
 import org.pacific_emis.surveys.core.preferences.entities.UploadState;
 import org.pacific_emis.surveys.core.utils.CollectionUtils;
 import org.pacific_emis.surveys.wash_core.data.model.Answer;
@@ -30,6 +31,7 @@ import org.pacific_emis.surveys.wash_core.data.persistence.entity.RoomWashSurvey
 import org.pacific_emis.surveys.wash_core.data.persistence.entity.relative.RelativeRoomSurvey;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -179,7 +181,15 @@ public class RoomWashDataSource extends CoreLocalDataSource implements WashDataS
 
     @Override
     public Single<Survey> getTemplateSurvey(AppRegion appRegion) {
-        return Single.fromCallable(() -> templateDatabase.getSurveyDao().getFirstFilled(appRegion))
+        return Single.fromCallable(() -> {
+                    RelativeRoomSurvey survey = templateDatabase.getSurveyDao().getFirstFilled(appRegion);
+                    if (survey != null) return survey;
+
+                    RelativeRoomSurvey fakeSurvey = new RelativeRoomSurvey();
+                    fakeSurvey.survey = new RoomWashSurvey(0, SurveyType.WASH, appRegion, null, null, null, null, null, null);
+                    fakeSurvey.groups = Collections.emptyList();
+                    return fakeSurvey;
+                })
                 .map(RelativeRoomSurvey::toMutable);
     }
 

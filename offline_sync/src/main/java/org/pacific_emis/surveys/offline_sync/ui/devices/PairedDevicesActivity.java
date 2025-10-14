@@ -73,7 +73,7 @@ public class PairedDevicesActivity extends BaseBluetoothActivity implements
         switch (requestCode) {
             case REQUEST_CODE_SYNC:
                 if (resultCode == RESULT_OK) {
-                    finish();
+                   close();
                 }
                 break;
             default:
@@ -157,6 +157,12 @@ public class PairedDevicesActivity extends BaseBluetoothActivity implements
     @Override
     public void navigateToSurveys() {
         startActivityForResult(SyncSurveysActivity.createIntent(this), REQUEST_CODE_SYNC);
+    }
+
+    @Override
+    public void close() {
+        setResult(RESULT_OK);
+        finish();
     }
 
     @Override
