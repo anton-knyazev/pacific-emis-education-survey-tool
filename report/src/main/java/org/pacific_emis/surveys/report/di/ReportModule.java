@@ -23,6 +23,9 @@ public class ReportModule {
     public ReportsProvider provideReportsProvider(LocalSettings localSettings) {
         switch (localSettings.getCurrentAppRegion()) {
             case FSM:
+            case PAC:
+            case KEM:
+            case PAL:
                 return fsmReportComponent.getFsmReportsProvider();
             case RMI:
                 return rmiReportComponent.getRmiReportsProvider();
@@ -34,6 +37,9 @@ public class ReportModule {
     public ReportInteractor provideReportInteractor(LocalSettings localSettings) {
         switch (localSettings.getCurrentAppRegion()) {
             case FSM:
+            case PAC:
+            case KEM:
+            case PAL:
                 return fsmReportComponent.getFsmReportInteractor();
             case RMI:
                 return rmiReportComponent.getRmiReportInteractor();

@@ -1,8 +1,10 @@
 package org.pacific_emis.surveys.core.utils;
 
+import org.pacific_emis.surveys.core.BuildConfig;
+
 public class Constants {
     public static final String FILE_MIME_TYPE = "text/xml";
-    public static final String AUTHORITY_FILE_PROVIDER = "org.pacific_emis.surveys.fileprovider";
+    public static final String AUTHORITY_FILE_PROVIDER_SUFFIX = ".fileprovider";
     public static final String DEFAULT_ROOT_FOLDER = "Root";
     public static final int SIZE_THUMB_PICTURE = 200;
     public static final int SECONDS_TO_LONG_LOADING_INDICATION = 5;

@@ -104,12 +104,15 @@ public final class DriveRemoteStorage implements RemoteStorage {
 
             if (credentialsStream != null) {
                 serviceCredentials = GoogleCredential.fromStream(
-                        credentialsStream,
-                        sTransport,
-                        sGsonFactory)
+                                credentialsStream,
+                                sTransport,
+                                sGsonFactory)
                         .createScoped(sScopes);
                 Drive drive = getDriveService(serviceCredentials);
-                driveServiceHelper = new DriveServiceHelper(drive);
+                driveServiceHelper = new DriveServiceHelper(
+                        drive,
+                        localSettings.getGoogleDriveSharedFolderId(localSettings.getOperatingMode())
+                );
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -127,28 +130,44 @@ public final class DriveRemoteStorage implements RemoteStorage {
                 .setApplicationName(appContext.getString(R.string.app_name))
                 .build();
         switch (localSettings.getCurrentAppRegion()) {
-            case FSM:
-                return new FsmSheetsExcelExporter(appContext, sheets);
             case RMI:
                 return new RmiSheetsExcelExporter(appContext, sheets);
+            case FSM:
+            case PAC:
+            case KEM:
+            case PAL:
             default:
-                throw new NotImplementedException();
+                return new FsmSheetsExcelExporter(appContext, sheets);
         }
     }
 
     @Nullable
     private InputStream getCredentialsStream() throws IOException {
         switch (localSettings.getOperatingMode()) {
-            case DEV:
-                return appContext.getAssets().open(BuildConfig.CREDENTIALS_DEV);
-            case PROD:
-                String cert = localSettings.getProdCert();
+            case TEST:
+                String keyDev = localSettings.getServiceAccountKeyDev();
 
-                if (cert == null) {
+                if (keyDev == null) {
+                    return appContext.getAssets().open(BuildConfig.CREDENTIALS_DEV);
+                }
+                return new ByteArrayInputStream(keyDev.getBytes());
+
+            case TRAIN:
+                String keyTrain = localSettings.getServiceAccountKeyTrain();
+
+                if (keyTrain == null) {
+                    return appContext.getAssets().open(BuildConfig.CREDENTIALS_TRAIN);
+                }
+                return new ByteArrayInputStream(keyTrain.getBytes());
+
+            case PROD:
+                String keyProd = localSettings.getServiceAccountKeyProd();
+
+                if (keyProd == null) {
                     return null;
                 }
+                return new ByteArrayInputStream(keyProd.getBytes());
 
-                return new ByteArrayInputStream(cert.getBytes());
             default:
                 return null;
         }
@@ -169,7 +188,7 @@ public final class DriveRemoteStorage implements RemoteStorage {
         String updater = userAccount.getEmail();
         String tabletId = localSettings.getTabletId();
         setSurveyUploadState(survey, UploadState.IN_PROGRESS);
-        return driveServiceHelper.createFolderIfNotExist(unwrap(survey.getAppRegion().getName()), null)
+        return driveServiceHelper.getFolderId(unwrap(survey.getAppRegion().getName()), null)
                 .flatMapCompletable(regionFolderId -> {
                     List<Photo> photos = dataSourceComponent.getDataRepository().getPhotos(survey);
                     return driveServiceHelper.uploadPhotos(photos, regionFolderId, new PhotoMetadata(survey))
@@ -185,10 +204,10 @@ public final class DriveRemoteStorage implements RemoteStorage {
                             .andThen(dataSourceComponent.getDataRepository().loadSurvey(survey.getAppRegion(), survey.getId())
                                     .subscribeOn(Schedulers.io()))
                             .flatMapCompletable(updatedSurvey -> driveServiceHelper.createOrUpdateFile(
-                                    SurveyTextUtil.createSurveyFileName(updatedSurvey, creator),
-                                    dataSourceComponent.getSurveySerializer().serialize(updatedSurvey),
-                                    new SurveyMetadata(updatedSurvey, updater, tabletId),
-                                    regionFolderId)
+                                            SurveyTextUtil.createSurveyFileName(updatedSurvey, creator),
+                                            dataSourceComponent.getSurveySerializer().serialize(updatedSurvey),
+                                            new SurveyMetadata(updatedSurvey, updater, tabletId),
+                                            regionFolderId)
                                     .doAfterSuccess(driveFileId -> {
                                         setDriveFileId(updatedSurvey, driveFileId);
                                         setSurveyUploadState(updatedSurvey, UploadState.SUCCESSFULLY);
@@ -279,12 +298,12 @@ public final class DriveRemoteStorage implements RemoteStorage {
                                                String templateName,
                                                String templateExtension) {
         return Single.fromCallable(() ->
-                filesRepository.createTmpFile(
-                        templateName,
-                        templateExtension,
-                        appContext.getAssets().open(templateName + "." + templateExtension)
+                        filesRepository.createTmpFile(
+                                templateName,
+                                templateExtension,
+                                appContext.getAssets().open(templateName + "." + templateExtension)
+                        )
                 )
-        )
                 .flatMap(file ->
                         driveServiceHelper.uploadFileFromSource(
                                 drive,
@@ -306,12 +325,15 @@ public final class DriveRemoteStorage implements RemoteStorage {
 
     private String getTemplateFileName() {
         switch (localSettings.getCurrentAppRegion()) {
-            case FSM:
-                return BuildConfig.NAME_REPORT_TEMPLATE_FSM;
             case RMI:
                 return BuildConfig.NAME_REPORT_TEMPLATE_RMI;
+            case FSM:
+            case PAC:
+            case KEM:
+            case PAL:
             default:
-                throw new NotImplementedException();
+                return BuildConfig.NAME_REPORT_TEMPLATE_FSM;
+
         }
     }
 

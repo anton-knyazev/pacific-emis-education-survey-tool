@@ -12,11 +12,14 @@ import org.pacific_emis.surveys.BuildConfig;
 import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.app_support.MicronesiaApplication;
 import org.pacific_emis.surveys.core.data.local_data_source.DataSource;
-import org.pacific_emis.surveys.core.data.remote_data_source.CoreRemoteDataSource;
+import org.pacific_emis.surveys.core.data.model.Survey;
+import org.pacific_emis.surveys.core.domain.SurveyInteractor;
 import org.pacific_emis.surveys.core.preferences.LocalSettings;
+import org.pacific_emis.surveys.core.preferences.entities.UploadState;
 import org.pacific_emis.surveys.core.ui.screens.base.BasePresenter;
 import org.pacific_emis.surveys.domain.SettingsInteractor;
 import org.pacific_emis.surveys.remote_settings.model.RemoteSettings;
+import org.pacific_emis.surveys.remote_storage.data.accessor.RemoteStorageAccessor;
 import org.pacific_emis.surveys.remote_storage.data.storage.RemoteStorage;
 import org.pacific_emis.surveys.ui.screens.settings.items.Item;
 import org.pacific_emis.surveys.ui.screens.settings.items.OptionsItemFactory;
@@ -24,8 +27,7 @@ import org.pacific_emis.surveys.ui.screens.settings.items.OptionsItemFactory;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-
-import javax.net.ssl.SSLHandshakeException;
+import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -38,6 +40,9 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
     private final static String MIME_TYPE_CERTIFICATE = "application/octet-stream";
 
     private final SettingsInteractor interactor = MicronesiaApplication.getInjection().getAppComponent().getSettingsInteractor();
+    private final DataSource dataSource = MicronesiaApplication.getInjection().getDataSourceComponent().getDataRepository();
+    private final RemoteStorageAccessor remoteStorageAccessor = MicronesiaApplication.getInjection().getRemoteStorageComponent().getRemoteStorageAccessor();
+    private final SurveyInteractor interactorSurveys = MicronesiaApplication.getInjection().getSurveyComponent().getSurveyInteractor();
     private final LocalSettings localSettings = MicronesiaApplication.getInjection().getCoreComponent().getLocalSettings();
     private final RemoteSettings remoteSettings = MicronesiaApplication.getInjection()
             .getRemoteSettingsComponent()
@@ -46,7 +51,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
             .getRemoteStorageComponent()
             .getRemoteStorage();
     private final OptionsItemFactory itemFactory = new OptionsItemFactory();
-    private final DataSource remoteDataSource = MicronesiaApplication.getInjection().getCoreComponent().getRemoteDataSource();
 
     @Nullable
     private ExternalDocumentPickerCallback documentPickerCallback;
@@ -69,7 +73,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
                 itemFactory.createLoadSubjectsItem(localSettings.getCurrentAppRegion().getName()),
                 itemFactory.createTemplatesItem(),
                 itemFactory.createForceFetchRemoteSettingsItem(),
-                itemFactory.createLoadProdCertificateItem(),
                 itemFactory.createTabletIdItem(Text.from(localSettings.getTabletId())),
                 itemFactory.createDebugStorageItem()
         ));
@@ -89,9 +92,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
                 break;
             case CONTACT:
                 onContactPressed();
-                break;
-            case CONTEXT:
-                onContextPressed();
                 break;
             case EXPORT_FOLDER:
                 onChooseFolderPressed();
@@ -135,10 +135,19 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         }
     }
 
+    private void loadRecentSurveys() {
+        addDisposable(interactorSurveys.getAllSurveys(localSettings.getCurrentAppRegion())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(disposable -> getViewState().showWaiting())
+                .doFinally(() -> getViewState().hideWaiting())
+                .subscribe(this::setSyncAllSurveysWithDrive, this::handleError));
+    }
+
     private void onLoadProdCertificatePressed() {
         documentPickerCallback = (contentResolver, uri) -> {
             String cert = readExternalUriToString(contentResolver, uri);
-            localSettings.setProdCert(cert);
+            localSettings.setServiceAccountKeyProd(cert);
             remoteStorage.refreshCredentials();
             getViewState().showToast(Text.from(R.string.toast_prod_cert_loaded));
         };
@@ -180,14 +189,6 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
         getViewState().navigateToChangeLogo();
     }
 
-    private void onContextPressed() {
-        getViewState().showRegionSelector(region -> {
-            localSettings.setCurrentAppRegion(region);
-            onForceFetchRemoteSettingsPressed();
-            refresh();
-        });
-    }
-
     private void onNamePressed() {
         getViewState().showInputDialog(
                 Text.from(R.string.title_input_name),
@@ -212,9 +213,20 @@ public class SettingsPresenter extends BasePresenter<SettingsView> {
 
     private void onOperatingModePressed() {
         getViewState().showOperatingModeSelector(mode -> {
+            if (mode != localSettings.getOperatingMode()) {
+                loadRecentSurveys();
+            }
             interactor.setOperatingMode(mode);
+            getViewState().setDisplayOperationMode(mode);
             refreshStartPageToken();
             refresh();
+        });
+    }
+
+    public void setSyncAllSurveysWithDrive(List<Survey> surveys) {
+        surveys.forEach(survey -> {
+            dataSource.setSurveyUploadState(survey, UploadState.IN_PROGRESS);
+            remoteStorageAccessor.scheduleUploading(survey.getId());
         });
     }
 

@@ -138,7 +138,8 @@ public class ObservationLogFragment extends BaseFragment implements
     private void updateLog(List<MutableObservationLogRecord> items, @Nullable Runnable commitCallback) {
         addButton.setText(items.isEmpty()
                 ? R.string.button_classroom_observation_log_start
-                : R.string.button_classroom_observation_log_add);
+                : R.string.button_classroom_observation_log_add
+        );
         adapter.submitList(items, commitCallback);
     }
 

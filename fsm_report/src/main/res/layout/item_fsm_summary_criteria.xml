@@ -35,20 +35,11 @@
         android:visibility="gone"
         tools:text="1" />
 
-    <FrameLayout
-        android:id="@+id/layout_subcriteria_total"
-        style="@style/FsmSummary.Cell.CriteriaTotal">
-
-        <TextView
-            android:id="@+id/textview_total"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:gravity="center_vertical|start"
-            android:textAppearance="@style/Text.Body3"
-            tools:text="4" />
-
-    </FrameLayout>
+    <TextView
+        android:id="@+id/textview_total"
+        style="@style/FsmSummary.Cell.CriteriaTotal"
+        android:gravity="center"
+        tools:text="4" />
 
 
 </LinearLayout>

@@ -21,6 +21,7 @@ android {
         buildConfigField "String", "NAME_REPORT_TEMPLATE_FSM", "\"report_fsm_v2\""
         buildConfigField "String", "NAME_REPORT_TEMPLATE_RMI", "\"report_rmi_v2\""
         buildConfigField "String", "EXTENSION_REPORT_TEMPLATE", "\"xlsx\""
+        buildConfigField "String", "CREDENTIALS_TRAIN", "\"education-survey-tool-train.json\""
     }
 
     buildTypes {

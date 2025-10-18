@@ -23,8 +23,11 @@ import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.utils.CollectionUtils;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
@@ -32,10 +35,13 @@ import io.reactivex.Single;
 
 import static org.pacific_emis.surveys.core.data.persistence.SchoolInfoDatabase.MIGRATION_1_2;
 import static org.pacific_emis.surveys.core.data.persistence.SchoolInfoDatabase.MIGRATION_2_3;
+import static org.pacific_emis.surveys.core.data.persistence.SchoolInfoDatabase.MIGRATION_3_4;
 
 public abstract class CoreLocalDataSource implements DataSource {
 
     private static final String SCHOOLS_DATABASE_NAME = "schools.database";
+
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
 
     protected final SchoolInfoDatabase schoolInfoDatabase;
 
@@ -46,7 +52,7 @@ public abstract class CoreLocalDataSource implements DataSource {
 
     public CoreLocalDataSource(Context applicationContext) {
         schoolInfoDatabase = Room.databaseBuilder(applicationContext, SchoolInfoDatabase.class, SCHOOLS_DATABASE_NAME)
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                 .build();
         schoolDao = schoolInfoDatabase.getSchoolDao();
         teacherDao = schoolInfoDatabase.getTeacherDao();
@@ -130,8 +136,8 @@ public abstract class CoreLocalDataSource implements DataSource {
     @Override
     public Completable saveLogInfo(Survey survey, LogAction action) {
         return Completable.fromAction(() -> {
-            RoomSurveyLog deletedSurvey = new RoomSurveyLog(survey, action);
-            surveyLogsDao.insert(deletedSurvey);
+            RoomSurveyLog changedSurvey = new RoomSurveyLog(survey, action, dateFormat.format(new Date()));
+            surveyLogsDao.insert(changedSurvey);
         });
     }
 

@@ -51,6 +51,9 @@ public class MainMenuActivity extends BaseBluetoothActivity implements MainMenuV
     @BindView(R.id.textview_hint_login)
     View loginHintView;
 
+    @BindView(R.id.textview_settings)
+    TextView settingsTextView;
+
     @BindView(R.id.textview_auth_name)
     TextView accountTextView;
 
@@ -138,13 +141,18 @@ public class MainMenuActivity extends BaseBluetoothActivity implements MainMenuV
     }
 
     @Override
-    public void setIcon(Image image) {
-        ViewUtils.setImageTo(iconImageView, image);
+    public void setIcon(Image image, int placeholderResId) {
+        ViewUtils.setImageTo(iconImageView, image, placeholderResId);
     }
 
     @Override
     public void setTitle(Text title) {
         title.applyTo(titleTextView);
+    }
+
+    @Override
+    public void setOperationModeAtSettings(Text operationMode) {
+        Text.from(R.string.label_settings, operationMode).applyTo(settingsTextView);
     }
 
     @Override
@@ -194,5 +202,11 @@ public class MainMenuActivity extends BaseBluetoothActivity implements MainMenuV
         loginHintView.setVisibility(View.INVISIBLE);
         accreditationButton.setEnabled(true);
         washButton.setEnabled(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        presenter.onForeground();
     }
 }

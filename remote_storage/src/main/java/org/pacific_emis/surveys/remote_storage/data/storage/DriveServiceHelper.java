@@ -1,5 +1,8 @@
 package org.pacific_emis.surveys.remote_storage.data.storage;
 
+import android.annotation.SuppressLint;
+
+import androidx.annotation.NonNull;
 import androidx.core.util.Pair;
 
 import com.google.api.client.http.ByteArrayContent;
@@ -30,8 +33,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import javax.annotation.Nullable;
 
@@ -49,12 +50,16 @@ public class DriveServiceHelper extends TasksRxWrapper {
     private static final String FIELD_ID = "id";
     private static final String FOLDER_NAME_PHOTOS = "photos";
     private static final String MIME_TYPE_JPEG = "image/jpeg";
+    private static final boolean SUPPORTS_ALL_DRIVES = true;
+    private static final boolean INCLUDE_ITEMS_FROM_ALL_DRIVES = true;
 
     private final Drive drive;
-    private final Executor executor = Executors.newCachedThreadPool();
+    @NonNull
+    private final String rootFolder;
 
-    public DriveServiceHelper(Drive driveService) {
+    public DriveServiceHelper(Drive driveService, @Nullable String rootFolder) {
         drive = driveService;
+        this.rootFolder = rootFolder != null ? rootFolder : FOLDER_ROOT;
     }
 
     public Single<String> createOrUpdateFile(final String fileName,
@@ -62,7 +67,7 @@ public class DriveServiceHelper extends TasksRxWrapper {
                                              final SurveyMetadata surveyMetadata,
                                              @Nullable final String folderId) {
         ByteArrayContent contentStream = ByteArrayContent.fromString(DriveType.XML.getValue(), content);
-        List<String> root = Collections.singletonList(folderId == null ? FOLDER_ROOT : folderId);
+        List<String> root = Collections.singletonList(folderId == null ? rootFolder : folderId);
         String query = new DriveQueryBuilder()
                 .parentId(root.get(0))
                 .mimeType(DriveType.XML.getValue())
@@ -79,6 +84,7 @@ public class DriveServiceHelper extends TasksRxWrapper {
                                 () -> {
                                     drive.files()
                                             .update(fileId, surveyMetadata.applyToDriveFile(existingFile), contentStream)
+                                            .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
                                             .execute();
                                     return fileId;
                                 },
@@ -93,12 +99,18 @@ public class DriveServiceHelper extends TasksRxWrapper {
                                     .setName(fileName)
                     );
 
-                    return wrapWithSingleInThreadPool(() -> drive.files().create(metadata, contentStream).execute().getId(), "");
+                    return wrapWithSingleInThreadPool(() ->
+                            drive.files()
+                                    .create(metadata, contentStream)
+                                    .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
+                                    .execute()
+                                    .getId(), "");
                 });
     }
 
-    public Single<String> createFolderIfNotExist(final String folderName, @Nullable final String parentFolderId) {
-        List<String> root = Collections.singletonList(parentFolderId == null ? FOLDER_ROOT : parentFolderId);
+
+    public Single<String> getFolderId(final String folderName, @Nullable final String parentFolderId) {
+        List<String> root = Collections.singletonList(parentFolderId == null ? rootFolder : parentFolderId);
 
         String query = new DriveQueryBuilder()
                 .parentId(root.get(0))
@@ -109,44 +121,16 @@ public class DriveServiceHelper extends TasksRxWrapper {
         return requestFiles(query, true)
                 .flatMap(fileList -> {
                     List<File> foundedFiles = fileList.getFiles();
-                    if (!CollectionUtils.isEmpty(foundedFiles)) {
-                        return Single.just(foundedFiles.get(0).getId());
-                    }
-
-                    File file = new File()
-                            .setParents(root)
-                            .setMimeType(DriveType.FOLDER.getValue())
-                            .setName(folderName);
-
-                    return wrapWithSingleInThreadPool(() -> drive.files().create(file).execute().getId(), "")
-                            // Double check for duplicate folder
-                            .flatMap(createdFolderId -> requestFiles(query, true)
-                                    .flatMap(fileList2 -> {
-
-                                        List<File> foundedFiles2 = fileList2.getFiles();
-
-                                        if (foundedFiles2.isEmpty()) {
-                                            return Single.just(createdFolderId);
-
-                                        }
-
-                                        Collections.reverse(foundedFiles2);
-
-                                        String firstFolderId = foundedFiles2.get(0).getId();
-
-                                        if (!firstFolderId.equals(createdFolderId)) {
-                                            return delete(createdFolderId)
-                                                    .andThen(Single.just(firstFolderId));
-                                        } else {
-                                            return Single.just(firstFolderId);
-
-                                        }
-                                    }));
+                    return Single.just(foundedFiles.get(0).getId());
                 });
     }
 
+
     public InputStream getFileContentStream(String fileId) throws IOException {
-        return drive.files().get(fileId).executeMediaAsInputStream();
+        return drive.files()
+                .get(fileId)
+                .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
+                .executeMediaAsInputStream();
     }
 
     public Single<String> readFile(final String fileId) {
@@ -166,7 +150,7 @@ public class DriveServiceHelper extends TasksRxWrapper {
     }
 
     public Single<List<GoogleDriveFileHolder>> queryFiles(@Nullable final String folderId) {
-        String parent = folderId == null ? FOLDER_ROOT : folderId;
+        String parent = folderId == null ? rootFolder : folderId;
 
         String query = new DriveQueryBuilder()
                 .parentId(parent)
@@ -192,7 +176,10 @@ public class DriveServiceHelper extends TasksRxWrapper {
     public Completable delete(String fileId) {
         return wrapWithCompletableInThreadPool(() -> {
             if (fileId != null) {
-                drive.files().delete(fileId).execute();
+                drive.files()
+                        .delete(fileId)
+                        .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
+                        .execute();
             }
         });
     }
@@ -203,10 +190,14 @@ public class DriveServiceHelper extends TasksRxWrapper {
 
     private Single<FileList> requestFiles(String query, boolean orderByCreateTime) {
         return wrapWithSingleInThreadPool(
-                () -> drive.files().list()
+                () -> drive
+                        .files()
+                        .list()
                         .setQ(query)
                         .setFields(FIELDS_TO_QUERY)
                         .setSpaces(SPACE_DRIVE)
+                        .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
+                        .setIncludeTeamDriveItems(INCLUDE_ITEMS_FROM_ALL_DRIVES)
                         .setOrderBy(orderByCreateTime ? ORDER_BY_CREATED_TIME : null)
                         .execute(),
                 new FileList()
@@ -231,13 +222,15 @@ public class DriveServiceHelper extends TasksRxWrapper {
                 .subscribeOn(Schedulers.io());
     }
 
+    @SuppressLint("CheckResult")
     public Single<List<Pair<Photo, File>>> uploadPhotos(List<Photo> photos, String parentFolderId, PhotoMetadata photoMetadata) {
-        return createFolderIfNotExist(FOLDER_NAME_PHOTOS, parentFolderId)
+
+        return getFolderId(FOLDER_NAME_PHOTOS, parentFolderId)
                 .flatMapObservable(photosFolderId -> Observable.fromIterable(photos)
                         .concatMapSingle(photo -> {
                             List<String> root = Collections.singletonList(photosFolderId);
 
-                            java.io.File photoFile = new java.io.File(photo.getLocalPath());
+                            java.io.File photoFile = new java.io.File(Objects.requireNonNull(photo.getLocalPath()));
 
                             if (!photoFile.exists()) {
                                 return Single.just(Pair.create(photo, (File) null));
@@ -269,6 +262,7 @@ public class DriveServiceHelper extends TasksRxWrapper {
                                                     photo,
                                                     drive.files()
                                                             .create(metadata, mediaContent)
+                                                            .setSupportsTeamDrives(SUPPORTS_ALL_DRIVES)
                                                             .execute()
                                             );
                                         }, Pair.create(photo, (File) null));
@@ -278,7 +272,7 @@ public class DriveServiceHelper extends TasksRxWrapper {
     }
 
     public Single<Optional<String>> getFileId(final String name, @Nullable final String parentFolderId) {
-        List<String> root = Collections.singletonList(parentFolderId == null ? FOLDER_ROOT : parentFolderId);
+        List<String> root = Collections.singletonList(parentFolderId == null ? rootFolder : parentFolderId);
 
         String query = new DriveQueryBuilder()
                 .parentId(root.get(0))
@@ -317,7 +311,11 @@ public class DriveServiceHelper extends TasksRxWrapper {
             String pageToken = savedPageToken;
             try {
                 while (pageToken != null) {
-                    ChangeList changes = drive.changes().list(pageToken).setRestrictToMyDrive(false).execute();
+                    ChangeList changes = drive.changes()
+                            .list(pageToken)
+                            .setSupportsTeamDrives(true)
+                            .setRestrictToMyDrive(false)
+                            .execute();
                     surveys.forEach(survey ->
                             changes.getChanges().forEach(change -> {
                                 if (Objects.equals(change.getFileId(), survey.getDriveFileId())) {

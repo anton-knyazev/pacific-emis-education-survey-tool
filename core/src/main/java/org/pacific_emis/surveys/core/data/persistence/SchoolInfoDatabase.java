@@ -6,7 +6,6 @@ import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
-
 import org.pacific_emis.surveys.core.BuildConfig;
 import org.pacific_emis.surveys.core.data.persistence.dao.SurveyLogsDao;
 import org.pacific_emis.surveys.core.data.persistence.dao.SchoolDao;
@@ -58,6 +57,14 @@ public abstract class SchoolInfoDatabase extends RoomDatabase {
                     "CREATE TABLE IF NOT EXISTS RoomSurveyLog (id INTEGER NOT NULL, surveyType TEXT, createUser TEXT, " +
                             "schoolName TEXT, schoolId TEXT, surveyTag TEXT, logAction TEXT, appRegion TEXT, PRIMARY KEY(id));"
             );
+        }
+    };
+
+    public static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE RoomSurveyLog ADD COLUMN surveyCreated TEXT DEFAULT ''");
+            database.execSQL("ALTER TABLE RoomSurveyLog ADD COLUMN surveyTime TEXT DEFAULT ''");
         }
     };
 }

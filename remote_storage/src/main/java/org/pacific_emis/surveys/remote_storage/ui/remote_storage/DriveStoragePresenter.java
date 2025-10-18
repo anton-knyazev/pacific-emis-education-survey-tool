@@ -113,7 +113,7 @@ public class DriveStoragePresenter extends BasePresenter<DriveStorageView> {
                         .observeOn(AndroidSchedulers.mainThread())
                         .doOnSubscribe(d -> getViewState().showWaiting())
                         .doFinally(getViewState()::hideWaiting)
-                        .subscribe(path -> getViewState().showToast(Text.from(R.string.format_file_downloaded, path)), this::handleError)
+                        .subscribe(path -> getViewState().showToast(Text.from(R.string.format_file_downloaded, path.toString())), this::handleError)
         );
     }
 

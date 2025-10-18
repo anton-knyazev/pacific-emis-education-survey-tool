@@ -24,7 +24,7 @@ public class FilesRepositoryImpl implements FilesRepository {
 
     public FilesRepositoryImpl(Context context) {
         appContext = context;
-        externalPicturesDirectory = Environment.getExternalStoragePublicDirectory(appContext.getString(R.string.app_name));
+        externalPicturesDirectory = context.getExternalCacheDir();
         cacheDirectory = context.getCacheDir();
     }
 

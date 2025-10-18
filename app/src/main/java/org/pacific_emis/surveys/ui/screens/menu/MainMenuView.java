@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import com.omega_r.libs.omegatypes.Text;
 import com.omega_r.libs.omegatypes.image.Image;
 import com.omegar.mvp.viewstate.strategy.AddToEndSingleStrategy;
+import com.omegar.mvp.viewstate.strategy.AddToEndStrategy;
 import com.omegar.mvp.viewstate.strategy.OneExecutionStateStrategy;
 import com.omegar.mvp.viewstate.strategy.StateStrategyType;
 
@@ -13,7 +14,7 @@ import org.pacific_emis.surveys.offline_sync.ui.base.BaseBluetoothView;
 public interface MainMenuView extends BaseBluetoothView {
 
     @StateStrategyType(AddToEndSingleStrategy.class)
-    void setIcon(Image icon);
+    void setIcon(Image icon, int placeholderResId);
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setTitle(Text title);
@@ -35,5 +36,8 @@ public interface MainMenuView extends BaseBluetoothView {
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setAccountName(@Nullable String accountName);
+
+    @StateStrategyType(AddToEndStrategy.class)
+    void setOperationModeAtSettings(Text operationMode);
 
 }

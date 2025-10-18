@@ -8,7 +8,6 @@ import org.pacific_emis.surveys.accreditation_core.data.model.mutable.MutableCri
 import org.pacific_emis.surveys.accreditation_core.data.model.mutable.MutableObservationLogRecord;
 import org.pacific_emis.surveys.accreditation_core.data.model.mutable.MutableStandard;
 import org.pacific_emis.surveys.core.data.model.Subject;
-import org.pacific_emis.surveys.core.data.model.Teacher;
 import org.pacific_emis.surveys.core.domain.SurveyInteractor;
 import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.UploadState;

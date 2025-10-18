@@ -70,6 +70,9 @@ public class RmiReportInteractorImpl extends BaseReportInteractor implements Rmi
                         if (criteriaSum > 0 && criteriaSum <= SchoolAccreditationTallyLevel.MAX_CRITERIA_SUM) {
                             counts[criteriaSum - 1]++;
                         }
+                        if (criteriaSum == 0) {
+                            counts[criteriaSum]++;
+                        }
                     }
                 }
             }

@@ -36,7 +36,7 @@ public class RemoteStorageUtils {
             return downloadFile;
         })
                 .flatMap(downloadFile -> remoteStorage.downloadContent(fileId, downloadFile, DriveType.EXCEL)
-                        .andThen(Single.just(FileProvider.getUriForFile(appContext, Constants.AUTHORITY_FILE_PROVIDER, downloadFile))));
+                        .andThen(Single.just(FileProvider.getUriForFile(appContext, appContext.getPackageName() + Constants.AUTHORITY_FILE_PROVIDER_SUFFIX, downloadFile))));
     }
 
     public static Single<Uri> downloadReportFromUrl(Context appContext,

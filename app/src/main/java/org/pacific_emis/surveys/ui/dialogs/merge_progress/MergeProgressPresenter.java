@@ -5,7 +5,9 @@ import com.omegar.mvp.InjectViewState;
 
 import org.pacific_emis.surveys.R;
 import org.pacific_emis.surveys.app_support.MicronesiaApplication;
+import org.pacific_emis.surveys.core.data.local_data_source.DataSource;
 import org.pacific_emis.surveys.core.data.model.Survey;
+import org.pacific_emis.surveys.core.preferences.entities.LogAction;
 import org.pacific_emis.surveys.core.ui.screens.base.BasePresenter;
 import org.pacific_emis.surveys.offline_sync.data.accessor.OfflineAccessor;
 import org.pacific_emis.surveys.offline_sync.data.bluetooth_threads.ConnectionState;
@@ -24,6 +26,9 @@ public class MergeProgressPresenter extends BasePresenter<MergeProgressView> {
     private static final int PERCENTAGE_SEND_SURVEY = 50;
     private static final int PERCENTAGE_PART_SEND_ALL_PHOTOS = 50;
 
+    private final DataSource dataSource = MicronesiaApplication.getInjection()
+            .getDataSourceComponent()
+            .getDataRepository();
     private final OfflineAccessor offlineAccessor = MicronesiaApplication.getInjection().getOfflineSyncComponent().getAccessor();
     private final OfflineSyncUseCase useCase = MicronesiaApplication.getInjection().getOfflineSyncComponent().getUseCase();
     private final SyncNotifier notifier = MicronesiaApplication.getInjection().getOfflineSyncComponent().getNotifier();
@@ -83,13 +88,21 @@ public class MergeProgressPresenter extends BasePresenter<MergeProgressView> {
                 setProgress(PERCENTAGE_ALL);
                 getViewState().setDescription(Text.from(R.string.hint_merge_successful));
                 Survey survey = useCase.getTargetSurvey();
-
                 if (survey != null) {
                     remoteStorageAccessor.scheduleUploading(survey.getId());
+                    saveEditedSurveyInfo(survey);
                 }
-
                 break;
         }
+    }
+
+    private void saveEditedSurveyInfo(Survey survey) {
+        addDisposable(dataSource.saveLogInfo(survey, LogAction.EDITED)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnSubscribe(d -> getViewState().showWaiting())
+                .doFinally(() -> getViewState().hideWaiting())
+                .subscribe(() -> {}, this::handleError));
     }
 
     private void setProgress(int progress) {

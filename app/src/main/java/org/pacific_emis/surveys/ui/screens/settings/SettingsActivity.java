@@ -18,8 +18,8 @@ import com.omegar.mvp.presenter.InjectPresenter;
 import java.util.List;
 
 import butterknife.BindView;
+import org.pacific_emis.surveys.BuildConfig;
 import org.pacific_emis.surveys.R;
-import org.pacific_emis.surveys.core.preferences.entities.AppRegion;
 import org.pacific_emis.surveys.core.preferences.entities.OperatingMode;
 import org.pacific_emis.surveys.core.ui.screens.base.BaseActivity;
 import org.pacific_emis.surveys.core.ui.views.InputDialog;
@@ -29,8 +29,6 @@ import org.pacific_emis.surveys.ui.screens.settings.items.Item;
 import org.pacific_emis.surveys.ui.screens.templates.SurveyTemplatesActivity;
 
 public class SettingsActivity extends BaseActivity implements SettingsView, BaseListAdapter.OnItemClickListener<Item>, SettingsAdapter.OnBooleanValueChangedListener {
-
-    private static final String TAG_INPUT_DIALOG = "TAG_INPUT_DIALOG";
 
     private final SettingsAdapter adapter = new SettingsAdapter(this, this);
 
@@ -46,6 +44,8 @@ public class SettingsActivity extends BaseActivity implements SettingsView, Base
     @Nullable
     private Dialog selectorDialog;
 
+    private OperatingMode displayOperatingMode = OperatingMode.TEST;
+
     public static Intent createIntent(Context context) {
         return new Intent(context, SettingsActivity.class);
     }
@@ -57,7 +57,7 @@ public class SettingsActivity extends BaseActivity implements SettingsView, Base
     }
 
     private void initViews() {
-        setTitle(R.string.label_settings);
+        setTitle(getString(R.string.label_settings, displayOperatingMode.getName().getString(this)));
         recyclerView.setAdapter(adapter);
     }
 
@@ -86,20 +86,6 @@ public class SettingsActivity extends BaseActivity implements SettingsView, Base
     @Override
     public void showRegionSelector(RegionListener listener) {
         selectorDialog = new BottomSheetDialog(this);
-        View sheetView = getLayoutInflater().inflate(R.layout.sheet_app_context, null);
-        View fsmItemView = sheetView.findViewById(R.id.textview_fsm);
-        View rmiItemView = sheetView.findViewById(R.id.textview_rmi);
-        TextView titleTextView = sheetView.findViewById(R.id.textview_title);
-        titleTextView.setText(R.string.title_choose_context);
-        fsmItemView.setOnClickListener(v -> {
-            listener.onRegionSelected(AppRegion.FSM);
-            safeDismiss(selectorDialog);
-        });
-        rmiItemView.setOnClickListener(v -> {
-            listener.onRegionSelected(AppRegion.RMI);
-            safeDismiss(selectorDialog);
-        });
-        selectorDialog.setContentView(sheetView);
         selectorDialog.show();
     }
 
@@ -109,18 +95,33 @@ public class SettingsActivity extends BaseActivity implements SettingsView, Base
         View sheetView = getLayoutInflater().inflate(R.layout.sheet_operating_mode, null);
         View prodItemView = sheetView.findViewById(R.id.textview_prod);
         View devItemView = sheetView.findViewById(R.id.textview_dev);
+        View trainItemView = sheetView.findViewById(R.id.textview_train);
+
+        prodItemView.setVisibility(BuildConfig.DEBUG ? View.GONE : View.VISIBLE);
+        trainItemView.setVisibility(displayOperatingMode == OperatingMode.PROD ? View.GONE : View.VISIBLE);
+
         TextView titleTextView = sheetView.findViewById(R.id.textview_title);
         titleTextView.setText(R.string.title_choose_op_mode);
+        devItemView.setOnClickListener(v -> {
+            listener.onOperatingModeSelected(OperatingMode.TEST);
+            safeDismiss(selectorDialog);
+        });
+        trainItemView.setOnClickListener(v -> {
+            listener.onOperatingModeSelected(OperatingMode.TRAIN);
+            safeDismiss(selectorDialog);
+        });
         prodItemView.setOnClickListener(v -> {
             listener.onOperatingModeSelected(OperatingMode.PROD);
             safeDismiss(selectorDialog);
         });
-        devItemView.setOnClickListener(v -> {
-            listener.onOperatingModeSelected(OperatingMode.DEV);
-            safeDismiss(selectorDialog);
-        });
         selectorDialog.setContentView(sheetView);
         selectorDialog.show();
+    }
+
+    @Override
+    public void setDisplayOperationMode(OperatingMode operatingMode) {
+        this.displayOperatingMode = operatingMode;
+        setTitle(getString(R.string.label_settings, operatingMode.getName().getString(this)));
     }
 
     @Override

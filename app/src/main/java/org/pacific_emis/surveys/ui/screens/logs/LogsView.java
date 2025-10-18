@@ -1,6 +1,7 @@
 package org.pacific_emis.surveys.ui.screens.logs;
 
 import com.omegar.mvp.viewstate.strategy.AddToEndSingleStrategy;
+import com.omegar.mvp.viewstate.strategy.OneExecutionStateStrategy;
 import com.omegar.mvp.viewstate.strategy.StateStrategyType;
 
 import org.pacific_emis.surveys.core.data.model.SurveyLog;
@@ -12,5 +13,8 @@ public interface LogsView extends BaseView {
 
     @StateStrategyType(AddToEndSingleStrategy.class)
     void setLogs(List<SurveyLog> logs);
+
+    @StateStrategyType(OneExecutionStateStrategy.class)
+    void showDetailLog(SurveyLog survey);
 
 }

@@ -207,7 +207,8 @@ public class AccreditationLocalDataSource extends CoreLocalDataSource implements
 
     @Override
     public Single<Survey> getTemplateSurvey(AppRegion appRegion) {
-        return Single.fromCallable(() -> templateDatabase.getSurveyDao().getFirstFilled(appRegion))
+        // TODO replace temp region
+        return Single.fromCallable(() -> templateDatabase.getSurveyDao().getFirstFilled(AppRegion.FSM))
                 .map(RelativeRoomSurvey::toMutableSurvey);
     }
 
@@ -250,6 +251,7 @@ public class AccreditationLocalDataSource extends CoreLocalDataSource implements
                     mutableSurvey.setCreateUser(userEmail);
                     mutableSurvey.setLastEditedUser(userEmail);
                     mutableSurvey.setTabletId(tabletId);
+                    mutableSurvey.setAppRegion(appRegion);
                     long id = saveSurvey(database, mutableSurvey, true);
                     return loadSurvey(appRegion, id);
                 });
@@ -263,12 +265,12 @@ public class AccreditationLocalDataSource extends CoreLocalDataSource implements
     @Override
     public Single<Answer> updateAnswer(Answer answer) {
         return Single.fromCallable(() -> {
-            RoomAnswer existingAnswer = answerDao.getById(answer.getId());
-            existingAnswer.comment = answer.getComment();
-            existingAnswer.state = answer.getState();
-            answerDao.update(existingAnswer);
-            return answerDao.getFilledById(existingAnswer.uid).toMutableAnswer();
-        })
+                    RoomAnswer existingAnswer = answerDao.getById(answer.getId());
+                    existingAnswer.comment = answer.getComment();
+                    existingAnswer.state = answer.getState();
+                    answerDao.update(existingAnswer);
+                    return answerDao.getFilledById(existingAnswer.uid).toMutableAnswer();
+                })
                 .flatMap(mutableAnswer -> {
                     List<MutablePhoto> existingPhotos = mutableAnswer.getPhotos();
                     List<MutablePhoto> expectedPhotos = answer.getPhotos() == null ? new ArrayList<>() : answer.getPhotos().stream()

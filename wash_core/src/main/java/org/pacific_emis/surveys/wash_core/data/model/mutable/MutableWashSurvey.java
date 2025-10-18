@@ -1,7 +1,6 @@
 package org.pacific_emis.surveys.wash_core.data.model.mutable;
 
 import android.content.Context;
-
 import androidx.annotation.Nullable;
 
 import org.pacific_emis.surveys.core.data.model.ConflictResolveStrategy;
@@ -118,4 +117,5 @@ public class MutableWashSurvey extends MutableSurvey implements WashSurvey {
                 .filter(question -> question.getPrefix().equals(parentId))
                 .findFirst();
     }
+
 }

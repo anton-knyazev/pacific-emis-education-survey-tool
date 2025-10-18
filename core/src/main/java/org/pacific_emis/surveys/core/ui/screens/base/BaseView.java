@@ -17,13 +17,13 @@ public interface BaseView extends MvpView {
     @StateStrategyType(OneExecutionStateStrategy.class)
     void showMessage(Text title, Text message);
 
-    @StateStrategyType(AddToEndSingleStrategy.class)
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void showWaiting();
 
-    @StateStrategyType(AddToEndSingleStrategy.class)
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void hideWaiting();
 
-    @StateStrategyType(AddToEndSingleStrategy.class)
+    @StateStrategyType(OneExecutionStateStrategy.class)
     void promptMasterPassword(Text title);
 
     @StateStrategyType(OneExecutionStateStrategy.class)
